@@ -41,7 +41,7 @@
             />
             Projetos
             <img
-              class="ml-20 transition-transform duration-300 group-hover:rotate-90"
+              class="ml-16 transition-transform duration-300 group-hover:rotate-90"
               src="../icons/seta.svg"
               alt="Ícone seta"
             />

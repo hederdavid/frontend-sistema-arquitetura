@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         'primary': '#9C5D31',
+        'secondary': '#2E1B0F',
         'pale-rose': '#FDF9F7'
       }
     },
