@@ -47,13 +47,21 @@
             />
           </div>
           <ul class="pl-12 hidden group-hover:block animate-fade-in">
+            <li>
+              <router-link
+                to=""
+                class="block p-2 text-pale-rose text-xs relative group"
+              >
+                <span class="underline-effect">Visualizar projetos</span>
+              </router-link>
+            </li>
             
             <li>
               <router-link
                 to=""
                 class="block p-2 text-pale-rose text-xs relative group"
               >
-                <span class="underline-effect">Feedbacks</span>
+                <span class="underline-effect">Subprojetos</span>
               </router-link>
             </li>
           </ul>
