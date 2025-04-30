@@ -9,7 +9,7 @@
         <Header />
       </div>
 
-      <TelaInicial class="flex-1 overflow-y-auto px-10 pt-8" />
+      <router-view class="flex-1 overflow-y-auto px-10 pt-8" />
       
     </div>
   </div>

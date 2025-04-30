@@ -98,8 +98,10 @@
         </li>
 
         <li>
-          <div
+          <router-link
+            to="/clientes"
             class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10 cursor-pointer"
+            active-class="bg-pale-rose bg-opacity-25 border-l-4 pl-5 rounded-l"
           >
             <img
               class="w-8"
@@ -107,7 +109,7 @@
               alt="Ícone clientes"
             />
             Clientes
-          </div>
+          </router-link>
         </li>
 
         <li>
