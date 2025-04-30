@@ -33,7 +33,7 @@ const progress = 40; // substitua por uma variável reativa conforme o progresso
       <h4 class="text-secondary opacity-70 text-xs">Responsável</h4>
       <p class="text-primary flex gap-1 items-center text-xs">
         <img class="w-4 h-4" src="../icons/usuario.svg" alt="Ícone do usuário" />
-        <span class="pt-0.5">Anne Beatriz</span>
+        <span class="">Anne Beatriz</span>
       </p>
     </div>
 
@@ -41,7 +41,7 @@ const progress = 40; // substitua por uma variável reativa conforme o progresso
       <h4 class="text-secondary opacity-70 text-xs">Cliente</h4>
       <p class="text-primary flex gap-1 items-center text-xs">
         <img class="w-4 h-4" src="../icons/usuario.svg" alt="Ícone do usuário" />
-        <span class="pt-0.5">João da Silva</span>
+        <span class="">João da Silva</span>
       </p>
     </div>
   </div>
