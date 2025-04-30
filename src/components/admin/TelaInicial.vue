@@ -73,7 +73,7 @@ const tarefasConcluidas = tarefas.filter(
     </main>
 
     <!-- Coluna da direita: Calendário -->
-    <aside class="w-full bg-white rounded-xl shadow-md p-4">
+    <aside class="w-full bg-white rounded-xl shadow-md p-4 h-">
       <h2 class="text-secondary text-2xl pb-4 flex gap-2 font-semibold">
         <img src="../icons/icone-calendário.svg" alt="Calendário" />Calendário
       </h2>

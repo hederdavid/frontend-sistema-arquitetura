@@ -11,8 +11,8 @@ const router = createRouter({
       name: 'dashboard',
       component: Dashboard,
       children: [
-        { path: '/dashboard', component: TelaInicial },
-        { path: '/clientes', component: Clientes }
+        { path: '/dashboard', component: TelaInicial, meta: { title: 'Dashboard' } },
+        { path: '/clientes', component: Clientes, meta: { title: 'Clientes' } }
       ]
     },
     {

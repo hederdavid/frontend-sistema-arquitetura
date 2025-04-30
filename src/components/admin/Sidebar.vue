@@ -19,14 +19,11 @@
         <li>
           <router-link
             to="/dashboard"
-            class="flex gap-2 p-1  items-center transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10"
-            active-class="bg-pale-rose bg-opacity-25 border-l-4 pl-5 rounded-l"
+            class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10 cursor-pointer"
+            exact-active-class="bg-pale-rose bg-opacity-25 border-l-4 pl-5 rounded-l"
           >
-            <img
-              class="w-8"
-              src="../icons/casa.svg"
-              alt="Ícone casa"
-            /> <span class="mt-1">Dashboard</span>
+            <img class="w-8" src="../icons/casa.svg" alt="Ícone casa" />
+            <span class="mt-1">Dashboard</span>
           </router-link>
         </li>
 
@@ -34,11 +31,7 @@
           <div
             class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10 cursor-pointer"
           >
-            <img
-              class="w-8"
-              src="../icons/projetos.svg"
-              alt="Ícone Projetos"
-            />
+            <img class="w-8" src="../icons/projetos.svg" alt="Ícone Projetos" />
             Projetos
             <img
               class="ml-16 transition-transform duration-300 group-hover:rotate-90"
@@ -55,7 +48,7 @@
                 <span class="underline-effect">Visualizar projetos</span>
               </router-link>
             </li>
-            
+
             <li>
               <router-link
                 to=""
@@ -73,11 +66,7 @@
             class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10"
             active-class="bg-pale-rose bg-opacity-25 border-l-4 rounded-l"
           >
-            <img
-              class="w-8"
-              src="../icons/tarefas.svg"
-              alt="Ícone Tarefas"
-            />
+            <img class="w-8" src="../icons/tarefas.svg" alt="Ícone Tarefas" />
             Tarefas
           </router-link>
         </li>
@@ -103,11 +92,7 @@
             class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10 cursor-pointer"
             active-class="bg-pale-rose bg-opacity-25 border-l-4 pl-5 rounded-l"
           >
-            <img
-              class="w-8"
-              src="../icons/clientes.svg"
-              alt="Ícone clientes"
-            />
+            <img class="w-8" src="../icons/clientes.svg" alt="Ícone clientes" />
             Clientes
           </router-link>
         </li>

@@ -4,7 +4,7 @@ const progress = 40; // substitua por uma variável reativa conforme o progresso
 
 <template>
   <div
-    class="bg-white w-48 p-2.5 flex flex-col gap-2.5 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg"
+    class="bg-white w-48 p-2.5 flex flex-col gap-2.5 rounded-lg shadow-md transform transition duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg cursor-pointer"
   >
     <img
       class="w-10"
