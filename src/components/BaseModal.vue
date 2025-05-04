@@ -12,7 +12,7 @@
         >
           <!-- Header -->
           <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-gray-800">{{ title }}</h2>
+            <h2 class="text-xl font-semibold text-primary">{{ title }}</h2>
             <button @click="close" class="text-gray-600 hover:text-red-500">
               &times;
             </button>

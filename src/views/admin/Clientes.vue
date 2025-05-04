@@ -25,50 +25,51 @@
       <!-- Formulário do Cliente -->
       <form class="grid grid-cols-2 gap-4">
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:border-amber-800 focus:ring-0"
           placeholder="Nome Completo"
         />
+
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="CPF/CNPJ"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Email"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Telefone"
         />
 
-        <h3 class="col-span-2 font-semibold mt-2">Endereço</h3>
+        <h3 class="col-span-2 font-semibold mt-2 text-primary">Endereço</h3>
 
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5"
           placeholder="CEP"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Cidade"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="UF"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Bairro"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Rua"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
           placeholder="Número"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5"
           placeholder="Complemento"
         />
       </form>
@@ -77,13 +78,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import BaseModal from '@/components/BaseModal.vue' // ajuste o caminho conforme necessário
+import { ref } from "vue";
+import BaseModal from "@/components/BaseModal.vue"; // ajuste o caminho conforme necessário
 
-const isModalOpen = ref(false)
+const isModalOpen = ref(false);
 
 const salvarCliente = () => {
-  console.log('Cliente salvo!')
-  isModalOpen.value = false
-}
+  console.log("Cliente salvo!");
+  isModalOpen.value = false;
+};
 </script>
