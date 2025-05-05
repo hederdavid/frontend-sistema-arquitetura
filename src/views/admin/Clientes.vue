@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col h-screen font-sans bg-pale-rose bg-opacity-30">
+  <div
+    class="flex flex-col h-screen font-sans bg-pale-rose bg-opacity-30 items-center"
+  >
     <!-- Botão Novo Cliente -->
     <button
       @click="isModalOpen = true"
@@ -10,8 +12,34 @@
     </button>
 
     <!-- Conteúdo Principal -->
-    <div class="bg-white w-4/5 h-[85%] mx-auto mt-10 rounded-lg shadow-md p-5">
-      <!-- Seu conteúdo aqui -->
+    <div class="bg-white w-[90%] mt-10 rounded-lg shadow-md p-5">
+      <div class="flex justify-between">
+        <p class="text-2xl text-primary font-semibold">
+          4 resultados encontrados
+        </p>
+        <div class="relative w-full max-w-sm">
+          <img
+            src="../../components/icons/lupa.svg"
+            alt="Lupa"
+            class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Pesquisar cliente"
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-es-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+      <div>
+        <ul class="flex justify-between mt-10 text-primary opacity-50">
+          <li class="basis-2/5">Nome</li>
+          <li class="basis-1/5">CPF/CNPJ</li>
+          <li class="basis-1/5">Telefone</li>
+          <li class="basis-1/5">Ações</li>
+        </ul>
+      </div>
+
+      <ExibirInformacoesCliente />
     </div>
 
     <!-- Modal de Cadastro de Cliente -->
@@ -80,6 +108,7 @@
 <script setup>
 import { ref } from "vue";
 import BaseModal from "@/components/BaseModal.vue"; // ajuste o caminho conforme necessário
+import ExibirInformacoesCliente from "@/components/admin/ExibirInformacoesCliente.vue";
 
 const isModalOpen = ref(false);
 

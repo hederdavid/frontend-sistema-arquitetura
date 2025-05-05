@@ -23,7 +23,7 @@
             exact-active-class="bg-pale-rose bg-opacity-25 border-l-4 pl-5 rounded-l"
           >
             <img class="w-8" src="../icons/casa.svg" alt="Ícone casa" />
-            <span class="mt-1">Dashboard</span>
+            <span class="">Dashboard</span>
           </router-link>
         </li>
 
