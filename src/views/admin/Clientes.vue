@@ -52,52 +52,56 @@
     >
       <!-- Formulário do Cliente -->
       <form class="grid grid-cols-2 gap-4">
-        <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:border-amber-800 focus:ring-0"
-          placeholder="Nome Completo"
-        />
+        <div class="col-span-2 flex w-full gap-4">
+          <input
+            class="flex-[1.5] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
+            placeholder="Nome Completo"
+          />
+          <input
+            class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
+            placeholder="CPF/CNPJ"
+          />
+        </div>
 
-        <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
-          placeholder="CPF/CNPJ"
-        />
-        <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
-          placeholder="Email"
-        />
-        <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
-          placeholder="Telefone"
-        />
+        <div class="col-span-2 flex w-full gap-4">
+          <input
+            class="flex-[2] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
+            placeholder="Email"
+          />
+          <input
+            class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
+            placeholder="Telefone"
+          />
+        </div>
 
         <h3 class="col-span-2 font-semibold mt-2 text-primary">Endereço</h3>
 
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="CEP"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="Cidade"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="UF"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="Bairro"
         />
         <input
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
+          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="Rua"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-10"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="Número"
         />
         <input
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5"
+          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0 focus:placeholder-transparent"
           placeholder="Complemento"
         />
       </form>
