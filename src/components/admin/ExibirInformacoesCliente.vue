@@ -102,19 +102,19 @@ const atualizarCliente = async () => {
   <ul
     class="flex justify-between mt-2 text-gray-800 border-t pt-2 items-center"
   >
-    <li class="basis-2/5">{{ props.cliente.nome_completo }}</li>
-    <li class="basis-1/5">{{ props.cliente.cpfOuCnpj }}</li>
-    <li class="basis-1/5">{{ props.cliente.telefone }}</li>
+    <li class="basis-2/5 text-primary font-semibold">{{ props.cliente.nome_completo }}</li>
+    <li class="basis-1/5 text-primary font-semibold">{{ props.cliente.cpfOuCnpj }}</li>
+    <li class="basis-1/5 text-primary font-semibold">{{ props.cliente.telefone }}</li>
     <li class="basis-1/5">
       <div class="flex gap-2">
         <button
           @click="isModalOpen = true"
-          class="text-white bg-orange-500 font-medium px-4 py-1 rounded transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 hover:scale-105"
+          class="text-white bg-[#D97706] font-medium px-4 py-1 rounded transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 hover:scale-105"
         >
           Editar
         </button>
         <button
-          class="text-white bg-red-500 font-medium px-4 py-1 rounded transition-all duration-300 hover:bg-red-100 hover:text-red-700 hover:scale-105"
+          class="text-white bg-[#B91C1C] font-medium px-4 py-1 rounded transition-all duration-300 hover:bg-red-100 hover:text-red-700 hover:scale-105"
         >
           Excluir
         </button>

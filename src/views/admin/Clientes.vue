@@ -5,6 +5,78 @@ import ExibirInformacoesCliente from "@/components/admin/ExibirInformacoesClient
 import { API_URL } from "../../utils/apiUrl.js";
 import { buscarEndereco } from "@/utils/buscarEnderecoApi.js";
 import { validarEmail, validarCPF, validarCNPJ } from "@/utils/validacoes.js";
+/* const clientesTeste = ref([
+  {
+    nome_completo: "Ana Paula Souza",
+    cpfOuCnpj: "123.456.789-00",
+    email: "ana.souza@example.com",
+    telefone: "(11) 98765-4321",
+    logradouro: "Rua das Flores",
+    numero: "123",
+    bairro: "Jardim Primavera",
+    complemento: "Apto 45",
+    cidade: "São Paulo",
+    uf: "SP",
+    cep: "01234-567",
+    tipo: "Pessoa Física"
+  },
+  {
+    nome_completo: "Carlos Henrique Lima",
+    cpfOuCnpj: "987.654.321-00",
+    email: "carlos.lima@example.com",
+    telefone: "(21) 99876-5432",
+    logradouro: "Avenida Central",
+    numero: "456",
+    bairro: "Centro",
+    complemento: "",
+    cidade: "Rio de Janeiro",
+    uf: "RJ",
+    cep: "20000-000",
+    tipo: "Pessoa Física"
+  },
+  {
+    nome_completo: "Empresa ABC Ltda",
+    cpfOuCnpj: "12.345.678/0001-90",
+    email: "contato@empresaabc.com.br",
+    telefone: "(31) 3344-5566",
+    logradouro: "Rua Industrial",
+    numero: "789",
+    bairro: "Distrito Industrial",
+    complemento: "Galpão 3",
+    cidade: "Belo Horizonte",
+    uf: "MG",
+    cep: "30123-456",
+    tipo: "Pessoa Jurídica"
+  },
+  {
+    nome_completo: "Mariana Oliveira",
+    cpfOuCnpj: "321.654.987-00",
+    email: "mariana.oliveira@example.com",
+    telefone: "(41) 91234-5678",
+    logradouro: "Rua das Acácias",
+    numero: "321",
+    bairro: "Santa Felicidade",
+    complemento: "Casa",
+    cidade: "Curitiba",
+    uf: "PR",
+    cep: "80540-120",
+    tipo: "Pessoa Física"
+  },
+  {
+    nome_completo: "Construtora XYZ",
+    cpfOuCnpj: "98.765.432/0001-10",
+    email: "suporte@construtoraxyz.com",
+    telefone: "(51) 4002-8922",
+    logradouro: "Avenida das Construções",
+    numero: "1000",
+    bairro: "Zona Sul",
+    complemento: "",
+    cidade: "Porto Alegre",
+    uf: "RS",
+    cep: "90000-000",
+    tipo: "Pessoa Jurídica"
+  }
+]); */
 
 const preencherEndereco = async () => {
   try {
@@ -26,7 +98,7 @@ const preencherEndereco = async () => {
 
 const handleClienteAtualizado = (clienteAtualizado) => {
   // Atualize a lista de clientes ou substitua o cliente na lista
-  const index = clientes.value.findIndex(c => c.id === clienteAtualizado.id);
+  const index = clientes.value.findIndex((c) => c.id === clienteAtualizado.id);
   if (index !== -1) {
     clientes.value[index] = clienteAtualizado;
   }
@@ -145,8 +217,6 @@ const salvarCliente = async () => {
 onMounted(() => {
   carregarClientes();
 });
-
-
 </script>
 
 <template>
@@ -191,7 +261,7 @@ onMounted(() => {
       </div>
 
       <ExibirInformacoesCliente
-        v-for="cliente in clientes"
+        v-for="cliente in clientesTeste"
         :key="cliente._id"
         :cliente="cliente"
         @clienteAtualizado="handleClienteAtualizado"
@@ -213,13 +283,13 @@ onMounted(() => {
             v-model="cliente.nome_completo"
             type="text"
             class="flex-[1.5] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="Nome Completo"
+            placeholder="Nome Completo *"
           />
           <input
             v-model="cliente.cpfOuCnpj"
             type="text"
             class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="CPF/CNPJ"
+            placeholder="CPF/CNPJ *"
           />
         </div>
 
@@ -228,61 +298,69 @@ onMounted(() => {
             v-model="cliente.email"
             type="email"
             class="flex-[2] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="Email"
+            placeholder="Email *"
           />
           <input
             v-model="cliente.telefone"
             type="text"
             class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="Telefone"
+            placeholder="Telefone *"
           />
         </div>
 
         <h3 class="col-span-2 font-semibold mt-2 text-primary">Endereço</h3>
 
-        <input
-          v-model="cliente.cep"
-          type="text"
-          @blur="preencherEndereco"
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="CEP"
-        />
-        <input
-          v-model="cliente.cidade"
-          type="text"
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Cidade"
-        />
-        <input
-          v-model="cliente.uf"
-          type="text"
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="UF"
-        />
-        <input
-          v-model="cliente.bairro"
-          type="text"
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Bairro"
-        />
-        <input
-          v-model="cliente.logradouro"
-          type="text"
-          class="col-span-2 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Rua"
-        />
-        <input
-          v-model="cliente.numero"
-          type="text"
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Número"
-        />
-        <input
-          v-model="cliente.complemento"
-          type="text"
-          class="border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Complemento"
-        />
+        <div class="col-span-2 flex gap-4">
+          <input
+            v-model="cliente.cep"
+            type="text"
+            @blur="preencherEndereco"
+            class="flex-[1] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="CEP *"
+          />
+          <input
+            v-model="cliente.cidade"
+            type="text"
+            class="flex-[3] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="Cidade *"
+          />
+          <input
+            v-model="cliente.uf"
+            type="text"
+            class="flex-[0.3] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="UF *"
+          />
+        </div>
+
+        <div class="col-span-2 flex gap-4">
+          <input
+            v-model="cliente.bairro"
+            type="text"
+            class="flex-[1] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="Bairro *"
+          />
+          <input
+            v-model="cliente.logradouro"
+            type="text"
+            class="flex-[2] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="Rua *"
+          />
+        </div>
+
+        <div class="col-span-2 flex gap-4">
+          <input
+            v-model="cliente.numero"
+            type="text"
+            class="flex-[1] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="Número *"
+          />
+          <input
+            v-model="cliente.complemento"
+            type="text"
+            class="flex-[4] border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            placeholder="Complemento"
+          />
+        </div>
       </form>
     </BaseModal>
   </div>
