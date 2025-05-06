@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.swal2-button-spacing {
+  gap: 5rem; /* espaçamento entre os botões */
+  justify-content: center; /* opcional: centraliza os botões */
+}

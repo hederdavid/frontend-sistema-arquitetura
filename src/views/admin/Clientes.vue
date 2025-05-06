@@ -5,110 +5,13 @@ import ExibirInformacoesCliente from "@/components/admin/ExibirInformacoesClient
 import { API_URL } from "../../utils/apiUrl.js";
 import { buscarEndereco } from "@/utils/buscarEnderecoApi.js";
 import { validarEmail, validarCPF, validarCNPJ } from "@/utils/validacoes.js";
-/* const clientesTeste = ref([
-  {
-    nome_completo: "Ana Paula Souza",
-    cpfOuCnpj: "123.456.789-00",
-    email: "ana.souza@example.com",
-    telefone: "(11) 98765-4321",
-    logradouro: "Rua das Flores",
-    numero: "123",
-    bairro: "Jardim Primavera",
-    complemento: "Apto 45",
-    cidade: "São Paulo",
-    uf: "SP",
-    cep: "01234-567",
-    tipo: "Pessoa Física"
-  },
-  {
-    nome_completo: "Carlos Henrique Lima",
-    cpfOuCnpj: "987.654.321-00",
-    email: "carlos.lima@example.com",
-    telefone: "(21) 99876-5432",
-    logradouro: "Avenida Central",
-    numero: "456",
-    bairro: "Centro",
-    complemento: "",
-    cidade: "Rio de Janeiro",
-    uf: "RJ",
-    cep: "20000-000",
-    tipo: "Pessoa Física"
-  },
-  {
-    nome_completo: "Empresa ABC Ltda",
-    cpfOuCnpj: "12.345.678/0001-90",
-    email: "contato@empresaabc.com.br",
-    telefone: "(31) 3344-5566",
-    logradouro: "Rua Industrial",
-    numero: "789",
-    bairro: "Distrito Industrial",
-    complemento: "Galpão 3",
-    cidade: "Belo Horizonte",
-    uf: "MG",
-    cep: "30123-456",
-    tipo: "Pessoa Jurídica"
-  },
-  {
-    nome_completo: "Mariana Oliveira",
-    cpfOuCnpj: "321.654.987-00",
-    email: "mariana.oliveira@example.com",
-    telefone: "(41) 91234-5678",
-    logradouro: "Rua das Acácias",
-    numero: "321",
-    bairro: "Santa Felicidade",
-    complemento: "Casa",
-    cidade: "Curitiba",
-    uf: "PR",
-    cep: "80540-120",
-    tipo: "Pessoa Física"
-  },
-  {
-    nome_completo: "Construtora XYZ",
-    cpfOuCnpj: "98.765.432/0001-10",
-    email: "suporte@construtoraxyz.com",
-    telefone: "(51) 4002-8922",
-    logradouro: "Avenida das Construções",
-    numero: "1000",
-    bairro: "Zona Sul",
-    complemento: "",
-    cidade: "Porto Alegre",
-    uf: "RS",
-    cep: "90000-000",
-    tipo: "Pessoa Jurídica"
-  }
-]); */
-
-const preencherEndereco = async () => {
-  try {
-    const endereco = await buscarEndereco(cliente.value.cep);
-    if (endereco) {
-      cliente.value.logradouro = endereco.logradouro || "";
-      cliente.value.bairro = endereco.bairro || "";
-      cliente.value.cidade = endereco.localidade || "";
-      cliente.value.uf = endereco.uf || "";
-      cliente.value.complemento = endereco.complemento || "";
-    } else {
-      alert("Endereço não encontrado para o CEP informado.");
-    }
-  } catch (error) {
-    console.error("Erro ao buscar endereço:", error);
-    alert("Erro ao buscar endereço.");
-  }
-};
-
-const handleClienteAtualizado = (clienteAtualizado) => {
-  // Atualize a lista de clientes ou substitua o cliente na lista
-  const index = clientes.value.findIndex((c) => c.id === clienteAtualizado.id);
-  if (index !== -1) {
-    clientes.value[index] = clienteAtualizado;
-  }
-};
+import { mostrarAlertaErro } from "@/utils/utilitarios.js";
+import { clientesTeste } from "@/utils/clientesTeste.js";
 
 const isModalOpen = ref(false);
 
 const clientes = ref([]);
 
-// Dados do cliente
 const cliente = ref({
   nome_completo: "",
   cpfOuCnpj: "",
@@ -124,7 +27,27 @@ const cliente = ref({
   tipo: "",
 });
 
-// Função para buscar todos os clientes
+const preencherEndereco = async () => {
+  try {
+    const endereco = await buscarEndereco(cliente.value.cep);
+    if (endereco) {
+      cliente.value.logradouro = endereco.logradouro || "";
+      cliente.value.bairro = endereco.bairro || "";
+      cliente.value.cidade = endereco.localidade || "";
+      cliente.value.uf = endereco.uf || "";
+      cliente.value.complemento = endereco.complemento || "";
+    } else {
+      mostrarAlertaErro(
+        "Erro",
+        "Endereço não encontrado para o CEP informado."
+      );
+    }
+  } catch (error) {
+    console.error("Erro ao buscar endereço:", error);
+    mostrarAlertaErro("Erro", "Erro ao buscar endereço.");
+  }
+};
+
 const carregarClientes = async () => {
   try {
     const response = await fetch(`${API_URL}/clientes`);
@@ -138,11 +61,10 @@ const carregarClientes = async () => {
   }
 };
 
-// Função para salvar cliente
 const salvarCliente = async () => {
   const c = cliente.value;
 
-  // Campos obrigatórios
+  // Validação de campos obrigatórios
   if (
     !c.nome_completo ||
     !c.cpfOuCnpj ||
@@ -155,25 +77,23 @@ const salvarCliente = async () => {
     !c.uf ||
     !c.cep
   ) {
-    alert("Preencha todos os campos obrigatórios.");
+    mostrarAlertaErro("Erro", "Preencha todos os campos obrigatórios.");
     return;
   }
 
-  // Email
   if (!validarEmail(c.email)) {
-    alert("E-mail inválido.");
+    mostrarAlertaErro("Erro", "Insira um e-mail válido.");
     return;
   }
 
   const doc = c.cpfOuCnpj.replace(/\D/g, "");
 
-  // CPF ou CNPJ
   if (validarCPF(doc)) {
     c.tipo = "PESSOA_FISICA";
   } else if (validarCNPJ(doc)) {
     c.tipo = "PESSOA_JURIDICA";
   } else {
-    alert("CPF ou CNPJ inválido.");
+    mostrarAlertaErro("Erro", "CPF ou CNPJ inválido.");
     return;
   }
 
@@ -192,6 +112,8 @@ const salvarCliente = async () => {
     console.log("Cliente salvo:", data);
 
     isModalOpen.value = false;
+
+    // Resetar o formulário
     cliente.value = {
       nome_completo: "",
       cpfOuCnpj: "",
@@ -213,7 +135,24 @@ const salvarCliente = async () => {
   }
 };
 
-// Carregar clientes ao montar o componente
+const handleClienteAtualizado = (clienteAtualizado) => {
+  const index = clientes.value.findIndex(
+    (c) => c._id === clienteAtualizado._id
+  );
+  if (index !== -1) {
+    clientes.value[index] = clienteAtualizado;
+    clientes.value = [...clientes.value];
+  }
+};
+
+const handleClienteExcluido = (id) => {
+  const index = clientes.value.findIndex((c) => c._id === id);
+  if (index !== -1) {
+    clientes.value.splice(index, 1);
+    clientes.value = [...clientes.value];
+  }
+};
+
 onMounted(() => {
   carregarClientes();
 });
@@ -261,10 +200,11 @@ onMounted(() => {
       </div>
 
       <ExibirInformacoesCliente
-        v-for="cliente in clientesTeste"
+        v-for="cliente in clientes"
         :key="cliente._id"
         :cliente="cliente"
         @clienteAtualizado="handleClienteAtualizado"
+        @clienteExcluido="handleClienteExcluido"
       />
     </div>
 
@@ -284,6 +224,7 @@ onMounted(() => {
             type="text"
             class="flex-[1.5] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
             placeholder="Nome Completo *"
+            required
           />
           <input
             v-model="cliente.cpfOuCnpj"
