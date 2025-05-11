@@ -61,6 +61,21 @@ const carregarClientes = async () => {
   }
 };
 
+const pesquisarClientes = async (query) => {
+  try {
+    const response = await fetch(`${API_URL}/clientes/buscar?nome=${encodeURIComponent(query)}`);
+    
+    if (!response.ok) throw new Error("Erro ao pesquisar clientes");
+
+    const data = await response.json();
+    clientes.value = data;
+    console.log("Clientes pesquisados:", data);
+  } catch (error) {
+    console.error("Erro ao pesquisar clientes:", error.message);
+  }
+};
+
+
 const salvarCliente = async () => {
   const c = cliente.value;
 
@@ -184,6 +199,8 @@ onMounted(() => {
             class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
           />
           <input
+            @input="pesquisarClientes($event.target.value)"
+            @keydown.enter="pesquisarClientes($event.target.value)"
             type="text"
             placeholder="Pesquisar cliente"
             class="w-full pl-10 pr-4 py-2 border border-primary-300 rounded-es-xl focus:outline-primary focus:ring-0 focus:ring-primary-500"
