@@ -200,7 +200,7 @@ onMounted(() => {
       </div>
 
       <ExibirInformacoesCliente
-        v-for="cliente in clientes"
+        v-for="cliente in clientesTeste"
         :key="cliente._id"
         :cliente="cliente"
         @clienteAtualizado="handleClienteAtualizado"

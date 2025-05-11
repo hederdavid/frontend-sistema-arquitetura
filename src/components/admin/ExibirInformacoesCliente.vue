@@ -10,6 +10,8 @@ import {
   mostrarAlertaAtencao,
 } from "@/utils/utilitarios.js";
 
+const mostrarTodosTelefones = ref(false);
+
 const props = defineProps({
   cliente: {
     type: Object,
@@ -18,12 +20,26 @@ const props = defineProps({
 });
 
 // Copia local do cliente para edição
-const clienteLocal = ref({ ...props.cliente });
+const clienteLocal = ref({
+  ...props.cliente,
+  telefones: Array.isArray(props.cliente.telefones)
+    ? [...props.cliente.telefones]
+    : props.cliente.telefone
+    ? [props.cliente.telefone]
+    : [],
+});
 
 watch(
   () => props.cliente,
   (novo) => {
-    clienteLocal.value = { ...novo };
+    clienteLocal.value = {
+      ...novo,
+      telefones: Array.isArray(novo.telefones)
+        ? [...novo.telefones]
+        : novo.telefone
+        ? [novo.telefone]
+        : [],
+    };
   },
   { deep: true }
 );
@@ -62,7 +78,7 @@ const atualizarCliente = async () => {
     !c.nome_completo ||
     !c.cpfOuCnpj ||
     !c.email ||
-    !c.telefone ||
+    !c.telefones.length ||
     !c.logradouro ||
     !c.numero ||
     !c.bairro ||
@@ -98,7 +114,10 @@ const atualizarCliente = async () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(c),
+      body: JSON.stringify({
+        ...c,
+        telefones: c.telefones,
+      }),
     });
 
     if (!response.ok) throw new Error("Erro ao atualizar cliente");
@@ -139,6 +158,14 @@ const excluirCliente = async (id) => {
     console.error("Erro ao excluir cliente:", error);
   }
 };
+
+// Funções para manipular telefones
+const adicionarTelefone = () => {
+  clienteLocal.value.telefones.push("");
+};
+const removerTelefone = (index) => {
+  clienteLocal.value.telefones.splice(index, 1);
+};
 </script>
 
 <template>
@@ -151,8 +178,39 @@ const excluirCliente = async (id) => {
     <li class="basis-1/5 text-primary font-semibold">
       {{ props.cliente.cpfOuCnpj }}
     </li>
-    <li class="basis-1/5 text-primary font-semibold">
-      {{ props.cliente.telefone }}
+    <li class="basis-1/5 text-primary font-semibold relative">
+      <span v-if="Array.isArray(props.cliente.telefones)">
+        {{ props.cliente.telefones[0] || '' }}
+        <button
+          v-if="props.cliente.telefones.length > 1"
+          @click="mostrarTodosTelefones = !mostrarTodosTelefones"
+          class="ml-2 text-xs text-blue-600 underline focus:outline-none"
+          title="Ver todos os telefones"
+        >
+          +{{ props.cliente.telefones.length - 1 }}
+        </button>
+        <div
+          v-if="mostrarTodosTelefones"
+          class="absolute z-10 bg-white border border-gray-300 rounded shadow-md p-2 mt-1 left-0 min-w-[120px]"
+        >
+          <div
+            v-for="(tel, i) in props.cliente.telefones"
+            :key="i"
+            class="text-gray-800 text-sm"
+          >
+            {{ tel }}
+          </div>
+          <button
+            @click="mostrarTodosTelefones = false"
+            class="block mt-2 text-xs text-blue-600 underline focus:outline-none"
+          >
+            Fechar
+          </button>
+        </div>
+      </span>
+      <span v-else>
+        {{ props.cliente.telefone || "" }}
+      </span>
     </li>
     <li class="basis-1/5">
       <div class="flex gap-2">
@@ -202,12 +260,34 @@ const excluirCliente = async (id) => {
           class="flex-[2] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
           placeholder="Email"
         />
-        <input
-          v-model="clienteLocal.telefone"
-          type="text"
-          class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Telefone"
-        />
+      </div>
+
+      <!-- Telefones -->
+      <div class="col-span-2">
+        <label class="font-semibold text-primary">Telefones</label>
+        <div v-for="(tel, i) in clienteLocal.telefones" :key="i" class="flex gap-2 mt-1">
+          <input
+            v-model="clienteLocal.telefones[i]"
+            type="text"
+            class="flex-1 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            :placeholder="`Telefone ${i + 1}`"
+          />
+          <button
+            type="button"
+            @click="removerTelefone(i)"
+            class="text-white bg-red-600 px-2 rounded hover:bg-red-800"
+            v-if="clienteLocal.telefones.length > 1"
+          >
+            Remover
+          </button>
+        </div>
+        <button
+          type="button"
+          @click="adicionarTelefone"
+          class="mt-2 text-white bg-green-600 px-3 py-1 rounded hover:bg-green-800"
+        >
+          Adicionar Telefone
+        </button>
       </div>
 
       <h3 class="col-span-2 font-semibold mt-2 text-primary">Endereço</h3>
