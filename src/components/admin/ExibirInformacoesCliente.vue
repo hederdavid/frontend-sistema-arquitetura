@@ -78,7 +78,7 @@ const atualizarCliente = async () => {
     !c.nome_completo ||
     !c.cpfOuCnpj ||
     !c.email ||
-    !c.telefones.length ||
+    c.telefones.length === 0 ||
     !c.logradouro ||
     !c.numero ||
     !c.bairro ||
@@ -107,6 +107,8 @@ const atualizarCliente = async () => {
     mostrarAlertaErro("Erro", "CPF ou CNPJ inválido.");
     return;
   }
+
+  console.log("Cliente a ser atualizado:", c);
 
   try {
     const response = await fetch(`${API_URL}/clientes/${c._id}`, {

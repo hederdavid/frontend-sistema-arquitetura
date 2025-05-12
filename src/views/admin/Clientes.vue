@@ -16,7 +16,7 @@ const cliente = ref({
   nome_completo: "",
   cpfOuCnpj: "",
   email: "",
-  telefone: "",
+  telefones: [],
   logradouro: "",
   numero: "",
   bairro: "",
@@ -62,18 +62,30 @@ const carregarClientes = async () => {
 };
 
 const pesquisarClientes = async (query) => {
+  if (!query.trim()) {
+    await carregarClientes(); // Recarrega todos os clientes se a busca estiver vazia
+    return;
+  }
+
   try {
-    const response = await fetch(`${API_URL}/clientes/buscar?nome=${encodeURIComponent(query)}`);
+    const response = await fetch(`${API_URL}/clientes/buscar?nome=${encodeURIComponent(query.trim())}`);
     
-    if (!response.ok) throw new Error("Erro ao pesquisar clientes");
+    if (!response.ok) {
+      throw new Error(`Erro ao pesquisar clientes: ${response.statusText}`);
+    }
 
     const data = await response.json();
-    clientes.value = data;
-    console.log("Clientes pesquisados:", data);
+
+    // 👇 Corrigido aqui
+    clientes.value = data.clientes;
+
+    console.log("Clientes encontrados:", data.clientes);
   } catch (error) {
     console.error("Erro ao pesquisar clientes:", error.message);
+    mostrarAlertaErro("Erro", "Não foi possível realizar a pesquisa. Tente novamente.");
   }
 };
+
 
 
 const salvarCliente = async () => {
@@ -84,7 +96,7 @@ const salvarCliente = async () => {
     !c.nome_completo ||
     !c.cpfOuCnpj ||
     !c.email ||
-    !c.telefone ||
+    c.telefones.length === 0 ||
     !c.logradouro ||
     !c.numero ||
     !c.bairro ||
@@ -133,7 +145,7 @@ const salvarCliente = async () => {
       nome_completo: "",
       cpfOuCnpj: "",
       email: "",
-      telefone: "",
+      telefone: [],
       logradouro: "",
       numero: "",
       bairro: "",
@@ -200,7 +212,6 @@ onMounted(() => {
           />
           <input
             @input="pesquisarClientes($event.target.value)"
-            @keydown.enter="pesquisarClientes($event.target.value)"
             type="text"
             placeholder="Pesquisar cliente"
             class="w-full pl-10 pr-4 py-2 border border-primary-300 rounded-es-xl focus:outline-primary focus:ring-0 focus:ring-primary-500"
@@ -217,12 +228,21 @@ onMounted(() => {
       </div>
 
       <ExibirInformacoesCliente
-        v-for="cliente in clientesTeste"
+        v-if="clientes.length > 0"
+        v-for="cliente in clientes"
         :key="cliente._id"
         :cliente="cliente"
         @clienteAtualizado="handleClienteAtualizado"
         @clienteExcluido="handleClienteExcluido"
       />
+      <div>
+        <p
+          v-if="clientes.length === 0"
+          class="text-center text-primary font-semibold mt-10"
+        >
+          Nenhum cliente encontrado.
+        </p>
+      </div>
     </div>
 
     <!-- Modal de Cadastro de Cliente -->
