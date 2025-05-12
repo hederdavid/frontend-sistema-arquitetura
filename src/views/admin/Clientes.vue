@@ -7,6 +7,24 @@ import { buscarEndereco } from "@/utils/buscarEnderecoApi.js";
 import { validarEmail, validarCPF, validarCNPJ } from "@/utils/validacoes.js";
 import { mostrarAlertaErro } from "@/utils/utilitarios.js";
 import { clientesTeste } from "@/utils/clientesTeste.js";
+import MensagemNotificacao from "@/components/MensagemNotificacao.vue";
+
+const showNotification = ref(false);
+const notificationType = ref("success");
+const notificationMessage = ref("");
+
+const showSuccess = () => {
+  notificationType.value = "success";
+  notificationMessage.value = "Usuário criado com sucesso!";
+  showNotification.value = true;
+};
+
+const showError = () => {
+  notificationType.value = "error";
+  notificationMessage.value = "Erro ao criar o usuário!";
+  showNotification.value = true;
+  isModalOpen.value = false;
+};
 
 const isModalOpen = ref(false);
 
@@ -16,7 +34,7 @@ const cliente = ref({
   nome_completo: "",
   cpfOuCnpj: "",
   email: "",
-  telefones: [],
+  telefones: [""],
   logradouro: "",
   numero: "",
   bairro: "",
@@ -68,8 +86,10 @@ const pesquisarClientes = async (query) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/clientes/buscar?nome=${encodeURIComponent(query.trim())}`);
-    
+    const response = await fetch(
+      `${API_URL}/clientes/buscar?nome=${encodeURIComponent(query.trim())}`
+    );
+
     if (!response.ok) {
       throw new Error(`Erro ao pesquisar clientes: ${response.statusText}`);
     }
@@ -82,11 +102,12 @@ const pesquisarClientes = async (query) => {
     console.log("Clientes encontrados:", data.clientes);
   } catch (error) {
     console.error("Erro ao pesquisar clientes:", error.message);
-    mostrarAlertaErro("Erro", "Não foi possível realizar a pesquisa. Tente novamente.");
+    mostrarAlertaErro(
+      "Erro",
+      "Não foi possível realizar a pesquisa. Tente novamente."
+    );
   }
 };
-
-
 
 const salvarCliente = async () => {
   const c = cliente.value;
@@ -105,6 +126,21 @@ const salvarCliente = async () => {
     !c.cep
   ) {
     mostrarAlertaErro("Erro", "Preencha todos os campos obrigatórios.");
+    return;
+  }
+
+  if (c.telefones.length < 1) {
+    mostrarAlertaErro("Erro", "Adicione pelo menos um telefone.");
+    return;
+  }
+
+  // Validação de telefones duplicados
+  const telefonesUnicos = new Set(c.telefones);
+  if (telefonesUnicos.size !== c.telefones.length) {
+    mostrarAlertaErro(
+      "Erro",
+      "Não é permitido adicionar telefones duplicados."
+    );
     return;
   }
 
@@ -139,13 +175,17 @@ const salvarCliente = async () => {
     console.log("Cliente salvo:", data);
 
     isModalOpen.value = false;
+    showSuccess();
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
 
     // Resetar o formulário
     cliente.value = {
       nome_completo: "",
       cpfOuCnpj: "",
       email: "",
-      telefone: [],
+      telefones: [""],
       logradouro: "",
       numero: "",
       bairro: "",
@@ -158,6 +198,10 @@ const salvarCliente = async () => {
 
     carregarClientes();
   } catch (error) {
+    showError();
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
     console.error("Erro ao salvar cliente:", error);
   }
 };
@@ -183,6 +227,14 @@ const handleClienteExcluido = (id) => {
 onMounted(() => {
   carregarClientes();
 });
+
+// Funções para manipular telefones
+const adicionarTelefone = () => {
+  cliente.value.telefones.push("");
+};
+const removerTelefone = (index) => {
+  cliente.value.telefones.splice(index, 1);
+};
 </script>
 
 <template>
@@ -278,12 +330,38 @@ onMounted(() => {
             class="flex-[2] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
             placeholder="Email *"
           />
-          <input
-            v-model="cliente.telefone"
-            type="text"
-            class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="Telefone *"
-          />
+        </div>
+
+        <div class="col-span-2">
+          <label class="font-semibold text-primary">Telefones</label>
+          <div
+            v-for="(tel, i) in cliente.telefones"
+            :key="i"
+            class="flex gap-2 mt-1"
+          >
+            <input
+              v-model="cliente.telefones[i]"
+              type="text"
+              class="flex-1 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+              :placeholder="`Telefone ${i + 1}`"
+              required
+            />
+            <button
+              type="button"
+              @click="removerTelefone(i)"
+              class="text-white bg-red-600 px-2 rounded hover:bg-red-800"
+              v-if="cliente.telefones.length > 1"
+            >
+              Remover
+            </button>
+          </div>
+          <button
+            type="button"
+            @click="adicionarTelefone"
+            class="mt-2 text-white bg-green-600 px-3 py-1 rounded hover:bg-green-800"
+          >
+            Adicionar Telefone
+          </button>
         </div>
 
         <h3 class="col-span-2 font-semibold mt-2 text-primary">Endereço</h3>
@@ -341,5 +419,11 @@ onMounted(() => {
         </div>
       </form>
     </BaseModal>
+    <MensagemNotificacao
+      :visible="showNotification"
+      :type="notificationType"
+      :message="notificationMessage"
+      @close="showNotification = false"
+    />
   </div>
 </template>

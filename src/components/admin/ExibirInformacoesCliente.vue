@@ -10,6 +10,25 @@ import {
   mostrarAlertaAtencao,
 } from "@/utils/utilitarios.js";
 
+import MensagemNotificacao from "@/components/MensagemNotificacao.vue";
+
+const showNotification = ref(false);
+const notificationType = ref("success");
+const notificationMessage = ref("");
+
+const showSuccess = () => {
+  notificationType.value = "success";
+  notificationMessage.value = "Usuário atualizado com sucesso!";
+  showNotification.value = true;
+};
+
+const showError = () => {
+  notificationType.value = "error";
+  notificationMessage.value = "Erro ao atualizar o usuário!";
+  showNotification.value = true;
+  isModalOpen.value = false;
+};
+
 const mostrarTodosTelefones = ref(false);
 
 const props = defineProps({
@@ -129,8 +148,16 @@ const atualizarCliente = async () => {
     console.log("Cliente atualizado:", data);
 
     isModalOpen.value = false;
+    showSuccess();
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
   } catch (error) {
     console.error("Erro ao atualizar cliente:", error);
+    showError();
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
   }
 };
 
@@ -154,10 +181,31 @@ const excluirCliente = async (id) => {
 
     if (!response.ok) throw new Error("Erro ao excluir cliente");
 
+    
+
     console.log("Cliente excluído:", id);
     emit("clienteExcluido", id);
+    showSuccess();
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
+    // notificationType.value = "success";
+    // notificationMessage.value = "Usuário excluído com sucesso!";
+    // showNotification.value = true;
+    // isModalOpen.value = false;
+
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
   } catch (error) {
     console.error("Erro ao excluir cliente:", error);
+    notificationType.value = "error";
+    notificationMessage.value = "Erro ao excluir o usuário!";
+    showNotification.value = true;
+
+    setTimeout(() => {
+      showNotification.value = false;
+    }, 3000);
   }
 };
 
@@ -182,7 +230,7 @@ const removerTelefone = (index) => {
     </li>
     <li class="basis-1/5 text-primary font-semibold relative">
       <span v-if="Array.isArray(props.cliente.telefones)">
-        {{ props.cliente.telefones[0] || '' }}
+        {{ props.cliente.telefones[0] || "" }}
         <button
           v-if="props.cliente.telefones.length > 1"
           @click="mostrarTodosTelefones = !mostrarTodosTelefones"
@@ -267,7 +315,11 @@ const removerTelefone = (index) => {
       <!-- Telefones -->
       <div class="col-span-2">
         <label class="font-semibold text-primary">Telefones</label>
-        <div v-for="(tel, i) in clienteLocal.telefones" :key="i" class="flex gap-2 mt-1">
+        <div
+          v-for="(tel, i) in clienteLocal.telefones"
+          :key="i"
+          class="flex gap-2 mt-1"
+        >
           <input
             v-model="clienteLocal.telefones[i]"
             type="text"
@@ -339,4 +391,10 @@ const removerTelefone = (index) => {
       />
     </form>
   </BaseModal>
+  <MensagemNotificacao
+    :visible="showNotification"
+    :type="notificationType"
+    :message="notificationMessage"
+    @close="showNotification = false"
+  />
 </template>
