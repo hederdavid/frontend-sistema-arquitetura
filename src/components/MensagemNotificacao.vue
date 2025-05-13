@@ -11,7 +11,7 @@
       <p>{{ message }}</p>
       <button
         @click="close"
-        class="absolute top-1 right-2 text-white hover:text-gray-300"
+        class="absolute top-1 right-1 text-white hover:text-gray-300"
       >
         &times;
       </button>

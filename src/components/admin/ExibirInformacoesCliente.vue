@@ -18,13 +18,13 @@ const notificationMessage = ref("");
 
 const showSuccess = () => {
   notificationType.value = "success";
-  notificationMessage.value = "Usuário atualizado com sucesso!";
+  notificationMessage.value = "Cliente atualizado com sucesso!";
   showNotification.value = true;
 };
 
 const showError = () => {
   notificationType.value = "error";
-  notificationMessage.value = "Erro ao atualizar o usuário!";
+  notificationMessage.value = "Erro ao atualizar o cliente!";
   showNotification.value = true;
   isModalOpen.value = false;
 };
@@ -87,6 +87,18 @@ const preencherEndereco = async () => {
 const emit = defineEmits(["clienteAtualizado", "clienteExcluido"]);
 
 const isModalOpen = ref(false);
+
+const openEditarModal = () => {
+  isModalOpen.value = true;
+  clienteLocal.value = {
+    ...props.cliente,
+    telefones: Array.isArray(props.cliente.telefones)
+      ? [...props.cliente.telefones]
+      : props.cliente.telefone
+      ? [props.cliente.telefone]
+      : [],
+  };
+};
 
 // Função para atualizar cliente
 const atualizarCliente = async () => {
@@ -162,6 +174,11 @@ const atualizarCliente = async () => {
 };
 
 const excluirCliente = async (id) => {
+  const resultConfirm = await mostrarAlertaAtencao(
+    "Atenção",
+    "Você tem certeza que deseja excluir este cliente?"
+  );
+  if (!resultConfirm.isConfirmed) return;
   const result = await mostrarAlertaAtencao(
     "Atenção",
     "Este cliente está associado a outros dados no sistema. A exclusão irá remover também as associações relacionadas. Verifique as informações antes de prosseguir."
@@ -181,26 +198,13 @@ const excluirCliente = async (id) => {
 
     if (!response.ok) throw new Error("Erro ao excluir cliente");
 
-    
-
     console.log("Cliente excluído:", id);
     emit("clienteExcluido", id);
-    showSuccess();
-    setTimeout(() => {
-      showNotification.value = false;
-    }, 3000);
-    // notificationType.value = "success";
-    // notificationMessage.value = "Usuário excluído com sucesso!";
-    // showNotification.value = true;
-    // isModalOpen.value = false;
-
-    setTimeout(() => {
-      showNotification.value = false;
-    }, 3000);
+    
   } catch (error) {
     console.error("Erro ao excluir cliente:", error);
     notificationType.value = "error";
-    notificationMessage.value = "Erro ao excluir o usuário!";
+    notificationMessage.value = "Erro ao excluir o cliente!";
     showNotification.value = true;
 
     setTimeout(() => {
@@ -265,7 +269,7 @@ const removerTelefone = (index) => {
     <li class="basis-1/5">
       <div class="flex gap-2">
         <button
-          @click="isModalOpen = true"
+          @click="openEditarModal"
           class="text-white bg-[#D97706] font-medium px-4 py-1 rounded transition-all duration-300 hover:bg-orange-100 hover:text-orange-700 hover:scale-105"
         >
           Editar
@@ -395,6 +399,6 @@ const removerTelefone = (index) => {
     :visible="showNotification"
     :type="notificationType"
     :message="notificationMessage"
-    @close="showNotification = false"
+    @close="showNotification.value = false"
   />
 </template>

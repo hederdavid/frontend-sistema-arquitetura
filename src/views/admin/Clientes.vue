@@ -15,13 +15,13 @@ const notificationMessage = ref("");
 
 const showSuccess = () => {
   notificationType.value = "success";
-  notificationMessage.value = "Usuário criado com sucesso!";
+  notificationMessage.value = "Cliente criado com sucesso!";
   showNotification.value = true;
 };
 
 const showError = () => {
   notificationType.value = "error";
-  notificationMessage.value = "Erro ao criar o usuário!";
+  notificationMessage.value = "Erro ao criar o cliente!";
   showNotification.value = true;
   isModalOpen.value = false;
 };
@@ -287,14 +287,13 @@ const removerTelefone = (index) => {
         @clienteAtualizado="handleClienteAtualizado"
         @clienteExcluido="handleClienteExcluido"
       />
-      <div>
-        <p
-          v-if="clientes.length === 0"
-          class="text-center text-primary font-semibold mt-10"
-        >
-          Nenhum cliente encontrado.
-        </p>
+
+      <div v-if="clientes.length === 0"
+       class="flex flex-col items-center justify-center h-64 mt-10 gap-4">
+        <img class="h-4/5" src="../../components/icons/not-found.svg" alt="">
+        <p class="text-primary font-semibold">Nenhum cliente encontrado.</p>
       </div>
+      
     </div>
 
     <!-- Modal de Cadastro de Cliente -->
@@ -356,7 +355,7 @@ const removerTelefone = (index) => {
             </button>
           </div>
           <button
-            type="button"
+            type="button"FFC764
             @click="adicionarTelefone"
             class="mt-2 text-white bg-green-600 px-3 py-1 rounded hover:bg-green-800"
           >
