@@ -9,7 +9,7 @@
         :class="[
           'bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl',
           maxWidthClass,
-          'max-h-[80vh] overflow-y-auto', // Adicionado aqui
+          'max-h-[80vh] overflow-y-auto',
         ]"
       >
         <!-- Header -->
@@ -62,7 +62,7 @@ const props = defineProps({
   },
   maxWidth: {
     type: String,
-    default: "xl", // Accepts: sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, full
+    default: "xl",
   },
 });
 

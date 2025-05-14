@@ -11,7 +11,6 @@ import {
 } from "@/utils/utilitarios.js";
 
 import MensagemNotificacao from "@/components/MensagemNotificacao.vue";
-
 const showNotification = ref(false);
 const notificationType = ref("success");
 const notificationMessage = ref("");
@@ -38,7 +37,6 @@ const props = defineProps({
   },
 });
 
-// Copia local do cliente para edição
 const clienteLocal = ref({
   ...props.cliente,
   telefones: Array.isArray(props.cliente.telefones)
@@ -100,11 +98,9 @@ const openEditarModal = () => {
   };
 };
 
-// Função para atualizar cliente
 const atualizarCliente = async () => {
   const c = clienteLocal.value;
 
-  // Campos obrigatórios
   if (
     !c.nome_completo ||
     !c.cpfOuCnpj ||
@@ -121,7 +117,6 @@ const atualizarCliente = async () => {
     return;
   }
 
-  // Email
   if (!validarEmail(c.email)) {
     mostrarAlertaErro("Erro", "Insira um email válido.");
     return;
@@ -129,7 +124,6 @@ const atualizarCliente = async () => {
 
   const doc = c.cpfOuCnpj.replace(/\D/g, "");
 
-  // CPF ou CNPJ
   if (validarCPF(doc)) {
     c.tipo = "PESSOA_FISICA";
   } else if (validarCNPJ(doc)) {
@@ -200,7 +194,6 @@ const excluirCliente = async (id) => {
 
     console.log("Cliente excluído:", id);
     emit("clienteExcluido", id);
-    
   } catch (error) {
     console.error("Erro ao excluir cliente:", error);
     notificationType.value = "error";
@@ -213,7 +206,6 @@ const excluirCliente = async (id) => {
   }
 };
 
-// Funções para manipular telefones
 const adicionarTelefone = () => {
   clienteLocal.value.telefones.push("");
 };

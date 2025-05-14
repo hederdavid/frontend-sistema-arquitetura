@@ -13,15 +13,15 @@ const showNotification = ref(false);
 const notificationType = ref("success");
 const notificationMessage = ref("");
 
-const showSuccess = () => {
+const showSuccess = (text) => {
   notificationType.value = "success";
-  notificationMessage.value = "Cliente criado com sucesso!";
+  notificationMessage.value =  text ? text : "Cliente criado com sucesso!";
   showNotification.value = true;
 };
 
-const showError = () => {
+const showError = (message) => {
   notificationType.value = "error";
-  notificationMessage.value = "Erro ao criar o cliente!";
+  notificationMessage.value = message ? message : "Erro ao criar o cliente!";
   showNotification.value = true;
   isModalOpen.value = false;
 };
@@ -81,7 +81,7 @@ const carregarClientes = async () => {
 
 const pesquisarClientes = async (query) => {
   if (!query.trim()) {
-    await carregarClientes(); // Recarrega todos os clientes se a busca estiver vazia
+    await carregarClientes();
     return;
   }
 
@@ -96,7 +96,6 @@ const pesquisarClientes = async (query) => {
 
     const data = await response.json();
 
-    // 👇 Corrigido aqui
     clientes.value = data.clientes;
 
     console.log("Clientes encontrados:", data.clientes);
@@ -112,7 +111,6 @@ const pesquisarClientes = async (query) => {
 const salvarCliente = async () => {
   const c = cliente.value;
 
-  // Validação de campos obrigatórios
   if (
     !c.nome_completo ||
     !c.cpfOuCnpj ||
@@ -169,7 +167,10 @@ const salvarCliente = async () => {
       body: JSON.stringify(c),
     });
 
-    if (!response.ok) throw new Error("Erro ao salvar cliente");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao salvar cliente");
+    }
 
     const data = await response.json();
     console.log("Cliente salvo:", data);
@@ -180,7 +181,6 @@ const salvarCliente = async () => {
       showNotification.value = false;
     }, 3000);
 
-    // Resetar o formulário
     cliente.value = {
       nome_completo: "",
       cpfOuCnpj: "",
@@ -198,7 +198,7 @@ const salvarCliente = async () => {
 
     carregarClientes();
   } catch (error) {
-    showError();
+    showError(error.message);
     setTimeout(() => {
       showNotification.value = false;
     }, 3000);
@@ -222,13 +222,16 @@ const handleClienteExcluido = (id) => {
     clientes.value.splice(index, 1);
     clientes.value = [...clientes.value];
   }
+  showSuccess("Cliente excluído com sucesso!");
+  setTimeout(() => {
+    showNotification.value = false;
+  }, 3000);
 };
 
 onMounted(() => {
   carregarClientes();
 });
 
-// Funções para manipular telefones
 const adicionarTelefone = () => {
   cliente.value.telefones.push("");
 };
@@ -241,7 +244,6 @@ const removerTelefone = (index) => {
   <div
     class="flex flex-col h-screen font-sans bg-pale-rose bg-opacity-30 items-center"
   >
-    <!-- Botão Novo Cliente -->
     <button
       @click="isModalOpen = true"
       class="font-semibold tracking-widest flex gap-4 bg-primary self-end text-white px-6 py-3 rounded-full shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
@@ -250,7 +252,6 @@ const removerTelefone = (index) => {
       NOVO CLIENTE
     </button>
 
-    <!-- Conteúdo Principal -->
     <div class="bg-white w-[90%] mt-10 rounded-lg shadow-md p-5">
       <div class="flex justify-between">
         <p class="text-2xl text-primary font-semibold">
@@ -296,7 +297,6 @@ const removerTelefone = (index) => {
       
     </div>
 
-    <!-- Modal de Cadastro de Cliente -->
     <BaseModal
       :visible="isModalOpen"
       title="Cadastrar Cliente"

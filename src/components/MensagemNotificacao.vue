@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue"; // Adicione 'computed' aqui
+import { ref, watch, computed } from "vue";
 import { defineProps, defineEmits } from "vue";
 
 const emit = defineEmits(["close"]);
@@ -28,7 +28,7 @@ const emit = defineEmits(["close"]);
 const props = defineProps({
   type: {
     type: String,
-    default: "success", // Accepts: success, error
+    default: "success",
   },
   message: {
     type: String,
@@ -40,7 +40,7 @@ const props = defineProps({
   },
   duration: {
     type: Number,
-    default: 3000, // Duration in milliseconds
+    default: 3000,
   },
 });
 

@@ -1,5 +1,5 @@
 <script setup>
-const progress = 40; // substitua por uma variável reativa conforme o progresso
+const progress = 40;
 </script>
 
 <template>
@@ -14,14 +14,12 @@ const progress = 40; // substitua por uma variável reativa conforme o progresso
     <h3 class="text-base text-secondary">Projeto Casa Popular</h3>
 
     <div class="flex items-center gap-1.5">
-      <!-- Barra de progresso -->
       <div class="w-full bg-neutral-200 rounded-full h-1 overflow-hidden">
         <div
           class="bg-secondary h-full transition-all duration-300"
           :style="{ width: `${progress}%` }"
         ></div>
       </div>
-      <!-- Texto com a % -->
       <span class="text-xs font-medium text-neutral-700 w-8 text-right">
         {{ Math.round(progress) }}%
       </span>
