@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '@/views/Dashboard.vue'
 import Clientes from '@/views/admin/Clientes.vue'
 import TelaInicial from '@/components/admin/TelaInicial.vue'
+import Tarefas from '@/views/admin/Tarefas.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,7 +13,8 @@ const router = createRouter({
       component: Dashboard,
       children: [
         { path: '/dashboard', component: TelaInicial, meta: { title: 'Dashboard' } },
-        { path: '/clientes', component: Clientes, meta: { title: 'Clientes' } }
+        { path: '/clientes', component: Clientes, meta: { title: 'Clientes' } },
+        { path: '/tarefas', component: Tarefas, meta: { title: 'Tarefas' } },
       ]
     },
     {

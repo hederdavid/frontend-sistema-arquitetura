@@ -62,7 +62,7 @@
 
         <li>
           <router-link
-            to="/entradas"
+            to="/tarefas"
             class="flex items-center gap-2 p-1 pl-6 transition-all transform duration-300 hover:scale-105 hover:bg-pale-rose hover:bg-opacity-10"
             active-class="bg-pale-rose bg-opacity-25 border-l-4 rounded-l"
           >
