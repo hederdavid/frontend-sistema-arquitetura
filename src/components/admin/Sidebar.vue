@@ -51,7 +51,7 @@
 
             <li>
               <router-link
-                to=""
+                to="/subprojetos"
                 class="block p-2 text-pale-rose text-xs relative group"
               >
                 <span class="underline-effect">Subprojetos</span>
