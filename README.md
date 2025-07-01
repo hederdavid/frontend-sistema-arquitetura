@@ -1,10 +1,10 @@
 # 🎨 Sistema de Projetos de Arquitetura
 
-Bem-vindo(a) ao **Sistema de Projetos de Arquitetura**,  Este projeto está sendo desenvolvido como parte da disciplina **Processos de Desenvolvimento de Software** no IFBA — semestre 2025.1, sob orientação da professora **Crijina Flores**.
+Bem-vindo(a) ao **Sistema de Projetos de Arquitetura**, Este projeto está sendo desenvolvido como parte da disciplina **Processos de Desenvolvimento de Software** no IFBA — semestre 2025.1, sob orientação da professora **Crijina Flores**.
 
 ![Vue.js](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vue.js&logoColor=4FC08D)
 ![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)
-![Sprint](https://img.shields.io/badge/Sprint-1-blueviolet?style=for-the-badge)
+![Sprint](https://img.shields.io/badge/Sprint-2-blueviolet?style=for-the-badge)
 
 ---
 
@@ -35,6 +35,7 @@ Este projeto está sendo desenvolvido por:
 - Mensagens de sucesso / erro
 
 > ⚠️ Funcionalidades futuras incluirão:
+>
 > - Gestão de projetos
 > - Acompanhamento de andamento
 > - Visualização detalhada
@@ -73,11 +74,20 @@ npm install
 npm run dev
 
 ```
+
 ## 🖼️ Layout (Figma)
 
 O design da aplicação foi planejado com foco na experiência da usuária, prezando por clareza e praticidade. Acesse o layout no Figma abaixo:
 
 🔗 **Link para o Figma**: [FIGMA](https://www.figma.com/design/StP9nCz2tw5lr75IxCCcIJ/Gest%C3%A3o-de-Projetos-Arquitet%C3%B4nicos---Anne-Beatriz?node-id=0-1&t=Mpv4vmE5FmjwsxCI-1)
+
+---
+
+## 🔗 Back-End do Projeto
+
+O back-end deste sistema está sendo desenvolvido separadamente. Você pode acessá-lo no repositório abaixo:
+
+🔗 **Link para o Back-End**: [GitHub - Back-End Arquitetura](https://github.com/Rebecafa02/back-end-arquitetura)
 
 ---
 
