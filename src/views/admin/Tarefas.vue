@@ -14,7 +14,7 @@ const notificationMessage = ref("");
 
 const showSuccess = (text) => {
   notificationType.value = "success";
-  notificationMessage.value =  text ? text : "Tarefa criada com sucesso!";
+  notificationMessage.value = text ? text : "Tarefa criada com sucesso!";
   showNotification.value = true;
 };
 
@@ -80,11 +80,8 @@ const pesquisarTarefas = async (query) => {
 const salvarTarefa = async () => {
   const t = tarefa.value;
 
-  if (
-    !t.nome ||
-    !t.descricao ||
-    !t.status
-  ) {
+  console.log("Tarefa a ser salva:", t);
+  if (!t.nome || !t.descricao || !t.status) {
     mostrarAlertaErro("Erro", "Preencha todos os campos obrigatórios.");
     return;
   }
@@ -129,9 +126,7 @@ const salvarTarefa = async () => {
 };
 
 const handleTarefaAtualizada = (tarefaAtualizada) => {
-  const index = tarefas.value.findIndex(
-    (t) => t._id === tarefaAtualizada._id
-  );
+  const index = tarefas.value.findIndex((t) => t._id === tarefaAtualizada._id);
   if (index !== -1) {
     tarefas.value[index] = tarefaAtualizada;
     tarefas.value = [...tarefas.value];
@@ -203,12 +198,13 @@ onMounted(() => {
         @tarefaExcluida="handleTarefaExcluida"
       />
 
-      <div v-if="tarefas.length === 0"
-       class="flex flex-col items-center justify-center h-64 mt-10 gap-4">
-        <img class="h-4/5" src="../../components/icons/not-found.svg" alt="">
+      <div
+        v-if="tarefas.length === 0"
+        class="flex flex-col items-center justify-center h-64 mt-10 gap-4"
+      >
+        <img class="h-4/5" src="../../components/icons/not-found.svg" alt="" />
         <p class="text-primary font-semibold">Nenhuma tarefa encontrada.</p>
       </div>
-      
     </div>
 
     <BaseModal
@@ -228,12 +224,15 @@ onMounted(() => {
             placeholder="Nome da tarefa *"
             required
           />
-          <input
+          <select
             v-model="tarefa.status"
-            type="text"
             class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-            placeholder="Status *"
-          />
+            required
+          >
+            <option value="">Selecione o status *</option>
+            <option value="ATIVO">Ativo</option>
+            <option value="INATIVO">Inativo</option>
+          </select>
         </div>
 
         <div class="col-span-2 flex w-full gap-4">

@@ -105,6 +105,14 @@ const openDescricaoModal = () => {
   );
 };
 
+const openTarefasModal = async () => {
+  if (tarefasDisponiveis.value.length === 0) {
+    await carregarTarefas(); // Ensure tasks are loaded if not already
+  }
+  carregarTarefasNaoVinculadas(); // Ensure non-linked tasks are filtered
+  isTarefasModalOpen.value = true; // Open the correct modal for viewing tasks
+};
+
 const openVerTarefasModal = async () => {
   try {
     tarefasDetalhes.value = await Promise.all(

@@ -55,6 +55,7 @@ const emit = defineEmits(["tarefaAtualizada", "tarefaExcluida"]);
 const isModalOpen = ref(false);
 
 const openEditarModal = () => {
+  console.log(tarefaLocal.value);
   isModalOpen.value = true;
   tarefaLocal.value = {
     ...props.tarefa,
@@ -66,16 +67,12 @@ const openDescricaoModal = () => {
     "Descrição da Tarefa",
     tarefaLocal.value.descricao || "Nenhuma descrição fornecida."
   );
-}
+};
 
 const atualizarTarefa = async () => {
   const t = tarefaLocal.value;
 
-  if (
-    t.nome === "" ||
-    t.descricao === "" ||
-    t.status === ""
-  ) {
+  if (t.nome === "" || t.descricao === "" || t.status === "") {
     mostrarAlertaErro("Erro", "Preencha todos os campos obrigatórios.");
     return;
   }
@@ -155,8 +152,16 @@ const excluirTarefa = async (id) => {
       {{ props.tarefa.nome }}
     </li>
 
-    <li class="basis-1/5 text-primary font-semibold">
-      {{ props.tarefa.status }}
+    <li class="basis-1/5 font-semibold  py-1 rounded">
+      <span
+        class="px-2 py-1 rounded"
+        :class="{
+          'text-green-600 bg-green-200': props.tarefa.status === 'ATIVO',
+          'text-red-600 bg-red-200': props.tarefa.status === 'INATIVO',
+        }"
+      >
+        {{ props.tarefa.status }}
+      </span>
     </li>
 
     <li class="basis-2/5">
@@ -198,12 +203,15 @@ const excluirTarefa = async (id) => {
           class="flex-[1.5] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
           placeholder="Nome da tarefa"
         />
-        <input
+        <select
           v-model="tarefaLocal.status"
-          type="text"
           class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="status"
-        />
+          required
+        >
+          <option value="">Selecione o status</option>
+          <option value="ATIVO">ATIVO</option>
+          <option value="INATIVO">INATIVO</option>
+        </select>
       </div>
 
       <div class="col-span-2 flex w-full gap-4">
