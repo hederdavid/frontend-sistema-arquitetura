@@ -11,7 +11,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <header class="flex justify-between items-center bg-white p-[23px] shadow-md">
+  <header class="flex justify-between items-center bg-white p-[23px]">
     <h2 class="text-xl text-primary font-semibold ml-2">{{ route.meta.title || route.name || 'Dashboard' }}</h2>
   </header>
 </template>

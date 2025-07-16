@@ -1,5 +1,7 @@
 <template>
-  <aside class="col-span-2 bg-primary text-pale-rose flex flex-col">
+  <aside
+    class="col-span-2 bg-primary text-pale-rose flex flex-col h-full transition-all duration-300"
+  >
     <h1 class="mb-4 border-b-2 border-pale-rose flex justify-center py-1">
       <img
         class="h-16"
@@ -42,7 +44,7 @@
           <ul class="pl-12 hidden group-hover:block animate-fade-in">
             <li>
               <router-link
-                to=""
+                to="/projetos"
                 class="block p-2 text-pale-rose text-xs relative group"
               >
                 <span class="underline-effect">Visualizar projetos</span>

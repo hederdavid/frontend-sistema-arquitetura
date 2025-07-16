@@ -1,4 +1,5 @@
 <script setup>
+import router from "@/router";
 import DescricaoTarefas from "../DescricaoTarefas.vue";
 import GoogleCalendar from "../GoogleCalendar.vue";
 import CardProjetos from "./CardProjetos.vue";
@@ -46,6 +47,10 @@ const tarefasEmAndamento = tarefas.filter(
 const tarefasConcluidas = tarefas.filter(
   (tarefa) => tarefa.status === STATUS.CONCLUIDO
 );
+
+const redirectToTarefas = () => {
+  router.push("/tarefas");
+}
 </script>
 <template>
   <div class="grid grid-cols-[1fr_25%] gap-4">
@@ -81,6 +86,7 @@ const tarefasConcluidas = tarefas.filter(
       <div class="flex justify-around items-center my-4">
         <h3 class="text-secondary font-bold">Tarefas</h3>
         <button
+          @click="redirectToTarefas"
           class="flex gap-1 text-tertiary border-2 border-tertiary rounded-3xl py-1 px-2 font-semibold transition-all transform duration-300 hover:scale-105"
         >
           <img src="../icons/add-icone-2.svg" alt="Ícone criar tarefa" />
