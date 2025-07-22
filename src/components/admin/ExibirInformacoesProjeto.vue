@@ -8,6 +8,10 @@ import {
   mostrarAlertaAtencao,
   mostrarAlertaInfo,
 } from "@/utils/utilitarios.js";
+import {
+  validarProjetoCompleto,
+  sanitizarProjeto,
+} from "@/utils/validacoes.js";
 
 import MensagemNotificacao from "@/components/MensagemNotificacao.vue";
 const showNotification = ref(false);
@@ -73,6 +77,132 @@ const emit = defineEmits(["projetoAtualizado", "projetoExcluido"]);
 
 const isModalOpen = ref(false);
 
+// Estados de validação em tempo real para edição
+const editValidationErrors = ref({
+  nome: "",
+  descricao: "",
+  clienteId: "",
+  dataInicio: "",
+  dataFimPrevista: "",
+});
+
+// Função para validar campo individual na edição
+const validarCampoEdicao = (campo, valor) => {
+  switch (campo) {
+    case "nome":
+      if (!valor || valor.trim().length === 0) {
+        editValidationErrors.value.nome = "Nome é obrigatório";
+      } else if (valor.trim().length < 3) {
+        editValidationErrors.value.nome =
+          "Nome deve ter pelo menos 3 caracteres";
+      } else if (valor.trim().length > 100) {
+        editValidationErrors.value.nome =
+          "Nome deve ter no máximo 100 caracteres";
+      } else {
+        editValidationErrors.value.nome = "";
+      }
+      break;
+
+    case "descricao":
+      if (!valor || valor.trim().length === 0) {
+        editValidationErrors.value.descricao = "Descrição é obrigatória";
+      } else if (valor.trim().length < 10) {
+        editValidationErrors.value.descricao =
+          "Descrição deve ter pelo menos 10 caracteres";
+      } else if (valor.trim().length > 1000) {
+        editValidationErrors.value.descricao =
+          "Descrição deve ter no máximo 1000 caracteres";
+      } else {
+        editValidationErrors.value.descricao = "";
+      }
+      break;
+
+    case "clienteId":
+      if (!valor || valor.trim().length === 0) {
+        editValidationErrors.value.clienteId = "Cliente é obrigatório";
+      } else {
+        editValidationErrors.value.clienteId = "";
+      }
+      break;
+
+    case "dataInicio":
+      if (!valor) {
+        editValidationErrors.value.dataInicio = "Data de início é obrigatória";
+      } else {
+        const dataInicio = new Date(valor);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        if (dataInicio < hoje) {
+          const diffDays = Math.floor(
+            (hoje - dataInicio) / (1000 * 60 * 60 * 24)
+          );
+          if (diffDays > 1) {
+            editValidationErrors.value.dataInicio =
+              "Data de início não pode ser muito anterior à data atual";
+          } else {
+            editValidationErrors.value.dataInicio = "";
+          }
+        } else {
+          editValidationErrors.value.dataInicio = "";
+        }
+
+        // Revalidar data fim se já estiver preenchida
+        if (projetoLocal.value.dataFimPrevista) {
+          validarCampoEdicao(
+            "dataFimPrevista",
+            projetoLocal.value.dataFimPrevista
+          );
+        }
+      }
+      break;
+
+    case "dataFimPrevista":
+      if (!valor) {
+        editValidationErrors.value.dataFimPrevista =
+          "Data fim prevista é obrigatória";
+      } else if (projetoLocal.value.dataInicio) {
+        const dataInicio = new Date(projetoLocal.value.dataInicio);
+        const dataFim = new Date(valor);
+
+        if (dataFim <= dataInicio) {
+          editValidationErrors.value.dataFimPrevista =
+            "Data fim deve ser posterior à data de início";
+        } else {
+          const diffTime = Math.abs(dataFim - dataInicio);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays > 1825) {
+            editValidationErrors.value.dataFimPrevista =
+              "Duração não pode exceder 5 anos";
+          } else {
+            editValidationErrors.value.dataFimPrevista = "";
+          }
+        }
+      } else {
+        editValidationErrors.value.dataFimPrevista = "";
+      }
+      break;
+  }
+};
+
+// Limpar erros de validação na edição
+const limparValidacoesEdicao = () => {
+  editValidationErrors.value = {
+    nome: "",
+    descricao: "",
+    clienteId: "",
+    dataInicio: "",
+    dataFimPrevista: "",
+  };
+};
+
+// Função para fechar modal de edição
+const fecharModalEdicao = () => {
+  isModalOpen.value = false;
+  limparValidacoesEdicao();
+};
+
 const carregarClientes = async () => {
   try {
     const response = await fetch(`${API_URL}/clientes`);
@@ -112,7 +242,7 @@ const carregarTarefasDoSubprojeto = async (subprojetoId, subprojetoIndex) => {
     // As tarefas vêm como array de IDs, precisamos buscar os dados completos
     if (subprojeto.tarefas && subprojeto.tarefas.length > 0) {
       const tarefasCompletas = [];
-      
+
       for (const tarefaId of subprojeto.tarefas) {
         try {
           // Buscar dados completos de cada tarefa
@@ -121,7 +251,7 @@ const carregarTarefasDoSubprojeto = async (subprojetoId, subprojetoIndex) => {
             const tarefaCompleta = await tarefaResponse.json();
             tarefasCompletas.push({
               tarefaId: tarefaCompleta._id,
-              tarefaNome: tarefaCompleta.nome || 'Tarefa sem nome',
+              tarefaNome: tarefaCompleta.nome || "Tarefa sem nome",
               dataInicio: "",
               dataFimPrevista: "",
               dataFimReal: "",
@@ -135,16 +265,22 @@ const carregarTarefasDoSubprojeto = async (subprojetoId, subprojetoIndex) => {
           console.error(`Erro ao buscar tarefa ${tarefaId}:`, error);
         }
       }
-      
+
       subprojetosSelecionados.value[subprojetoIndex].tarefas = tarefasCompletas;
     } else {
       subprojetosSelecionados.value[subprojetoIndex].tarefas = [];
     }
 
-    console.log("Tarefas após processamento:", subprojetosSelecionados.value[subprojetoIndex].tarefas);
+    console.log(
+      "Tarefas após processamento:",
+      subprojetosSelecionados.value[subprojetoIndex].tarefas
+    );
   } catch (error) {
     console.error("Erro ao carregar tarefas do subprojeto:", error);
-    mostrarAlertaErro("Erro", "Não foi possível carregar as tarefas do subprojeto.");
+    mostrarAlertaErro(
+      "Erro",
+      "Não foi possível carregar as tarefas do subprojeto."
+    );
     subprojetosSelecionados.value[subprojetoIndex].tarefas = [];
   }
 };
@@ -163,7 +299,8 @@ const removerSubprojeto = (index) => {
 
 const openEditarModal = async () => {
   isModalOpen.value = true;
-  
+  limparValidacoesEdicao();
+
   projetoLocal.value = {
     ...props.projeto,
     clienteId: props.projeto.clienteId?._id,
@@ -180,40 +317,43 @@ const openEditarModal = async () => {
 
   const taskNameMap = new Map();
   if (subprojetosDisponiveis.value) {
-      subprojetosDisponiveis.value.forEach(sub => {
-          if (sub.tarefas) {
-              sub.tarefas.forEach(task => {
-                  taskNameMap.set(task._id, task.nome);
-              });
-          }
-      });
+    subprojetosDisponiveis.value.forEach((sub) => {
+      if (sub.tarefas) {
+        sub.tarefas.forEach((task) => {
+          taskNameMap.set(task._id, task.nome);
+        });
+      }
+    });
   }
 
   subprojetosSelecionados.value = props.projeto.subprojetos
     ? props.projeto.subprojetos
-      .filter(sub => sub && sub.subprojetoId) 
-      .map((sub) => ({
-        key: nextSubprojetoKey++,
-        subprojetoId: sub.subprojetoId._id, 
-        tarefas: (sub.tarefas || [])
-          .filter(tarefa => tarefa && tarefa.tarefaId) 
-          .map((tarefa) => {
-            const tarefaId = tarefa.tarefaId._id;
-            return {
-              tarefaId: tarefaId,
-              tarefaNome: taskNameMap.get(tarefaId) || "Tarefa não encontrada",
-              status: tarefa.status,
-              observacoes: tarefa.observacoes || "",
-              dataInicio: tarefa.dataInicio ? tarefa.dataInicio.split("T")[0] : "",
-              dataFimPrevista: tarefa.dataFimPrevista
-                ? tarefa.dataFimPrevista.split("T")[0]
-                : "",
-              dataFimReal: tarefa.dataFimReal
-                ? tarefa.dataFimReal.split("T")[0]
-                : "",
-            }
-          }),
-      }))
+        .filter((sub) => sub && sub.subprojetoId)
+        .map((sub) => ({
+          key: nextSubprojetoKey++,
+          subprojetoId: sub.subprojetoId._id,
+          tarefas: (sub.tarefas || [])
+            .filter((tarefa) => tarefa && tarefa.tarefaId)
+            .map((tarefa) => {
+              const tarefaId = tarefa.tarefaId._id;
+              return {
+                tarefaId: tarefaId,
+                tarefaNome:
+                  taskNameMap.get(tarefaId) || "Tarefa não encontrada",
+                status: tarefa.status,
+                observacoes: tarefa.observacoes || "",
+                dataInicio: tarefa.dataInicio
+                  ? tarefa.dataInicio.split("T")[0]
+                  : "",
+                dataFimPrevista: tarefa.dataFimPrevista
+                  ? tarefa.dataFimPrevista.split("T")[0]
+                  : "",
+                dataFimReal: tarefa.dataFimReal
+                  ? tarefa.dataFimReal.split("T")[0]
+                  : "",
+              };
+            }),
+        }))
     : [];
 };
 
@@ -225,7 +365,8 @@ const openDescricaoModal = () => {
 };
 
 const atualizarProjeto = async () => {
-  const p = {
+  // Primeiro, sanitizar os dados
+  const projetoSanitizado = sanitizarProjeto({
     ...projetoLocal.value,
     subprojetos: subprojetosSelecionados.value
       .filter((sub) => sub.subprojetoId && sub.tarefas.length > 0)
@@ -240,31 +381,38 @@ const atualizarProjeto = async () => {
           observacoes: tarefa.observacoes || "",
         })),
       })),
-  };
+  });
 
-  console.log("Projeto a ser atualizado:", p);
+  // Validar o projeto completo
+  const resultadoValidacao = validarProjetoCompleto(projetoSanitizado);
 
-  if (
-    !p.nome ||
-    !p.descricao ||
-    !p.clienteId ||
-    !p.dataInicio ||
-    !p.dataFimPrevista
-  ) {
-    mostrarAlertaErro("Erro", "Preencha todos os campos obrigatórios.");
+  if (!resultadoValidacao.valido) {
+    const errosDetalhados = resultadoValidacao.erros.join("\n• ");
+    mostrarAlertaErro(
+      "Dados inválidos",
+      `Por favor, corrija os seguintes erros:\n\n• ${errosDetalhados}`
+    );
     return;
   }
 
-  try {
-    const response = await fetch(`${API_URL}/projetos/${p._id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(p),
-    });
+  console.log("Projeto a ser atualizado:", projetoSanitizado);
 
-    if (!response.ok) throw new Error("Erro ao atualizar projeto");
+  try {
+    const response = await fetch(
+      `${API_URL}/projetos/${projetoSanitizado._id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projetoSanitizado),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao atualizar projeto");
+    }
 
     const data = await response.json();
     emit("projetoAtualizado", data);
@@ -324,7 +472,7 @@ onMounted(() => {
 // Funções auxiliares para o novo layout
 const formatarData = (data) => {
   if (!data) return "Não definida";
-  return new Date(data + 'T00:00:00').toLocaleDateString("pt-BR");
+  return new Date(data + "T00:00:00").toLocaleDateString("pt-BR");
 };
 
 const calcularDuracao = (dataInicio, dataFim) => {
@@ -382,7 +530,7 @@ const calcularProgressoPercentual = () => {
         <div class="flex items-center gap-4 text-sm text-gray-600">
           <div class="flex items-center gap-1">
             <span class="font-medium">Cliente:</span>
-            <span>{{ props.projeto.clienteId?.nome_completo || 'N/A' }}</span>
+            <span>{{ props.projeto.clienteId?.nome_completo || "N/A" }}</span>
           </div>
           <div class="flex items-center gap-1">
             <span class="font-medium">Subprojetos:</span>
@@ -531,42 +679,84 @@ const calcularProgressoPercentual = () => {
     :visible="isModalOpen"
     title="Atualizar Projeto"
     confirm-text="Salvar"
-    @close="isModalOpen = false"
+    @close="fecharModalEdicao"
     @confirm="atualizarProjeto"
   >
     <form class="space-y-4 max-h-[70vh] overflow-y-auto p-1">
       <!-- Nome e Cliente -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input
-          v-model="projetoLocal.nome"
-          type="text"
-          class="w-full border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Nome do projeto *"
-          required
-        />
-        <select
-          v-model="projetoLocal.clienteId"
-          class="w-full border border-amber-700 rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          required
-        >
-          <option value="">Selecione o cliente *</option>
-          <option
-            v-for="cliente in clientes"
-            :key="cliente._id"
-            :value="cliente._id"
+        <div>
+          <input
+            v-model="projetoLocal.nome"
+            @blur="validarCampoEdicao('nome', projetoLocal.nome)"
+            @input="validarCampoEdicao('nome', projetoLocal.nome)"
+            type="text"
+            class="w-full border rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            :class="
+              editValidationErrors.nome ? 'border-red-500' : 'border-amber-700'
+            "
+            placeholder="Nome do projeto *"
+            required
+          />
+          <p v-if="editValidationErrors.nome" class="text-red-500 text-xs mt-1">
+            {{ editValidationErrors.nome }}
+          </p>
+        </div>
+
+        <div>
+          <select
+            v-model="projetoLocal.clienteId"
+            @change="validarCampoEdicao('clienteId', projetoLocal.clienteId)"
+            class="w-full border rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            :class="
+              editValidationErrors.clienteId
+                ? 'border-red-500'
+                : 'border-amber-700'
+            "
+            required
           >
-            {{ cliente.nome_completo }}
-          </option>
-        </select>
+            <option value="">Selecione o cliente *</option>
+            <option
+              v-for="cliente in clientes"
+              :key="cliente._id"
+              :value="cliente._id"
+            >
+              {{ cliente.nome_completo }}
+            </option>
+          </select>
+          <p
+            v-if="editValidationErrors.clienteId"
+            class="text-red-500 text-xs mt-1"
+          >
+            {{ editValidationErrors.clienteId }}
+          </p>
+        </div>
       </div>
 
       <!-- Descrição -->
-      <textarea
-        v-model="projetoLocal.descricao"
-        class="w-full border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-        placeholder="Descrição *"
-        rows="3"
-      ></textarea>
+      <div>
+        <textarea
+          v-model="projetoLocal.descricao"
+          @blur="validarCampoEdicao('descricao', projetoLocal.descricao)"
+          @input="validarCampoEdicao('descricao', projetoLocal.descricao)"
+          class="w-full border rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+          :class="
+            editValidationErrors.descricao
+              ? 'border-red-500'
+              : 'border-amber-700'
+          "
+          placeholder="Descrição *"
+          rows="3"
+        ></textarea>
+        <div class="flex justify-between items-center mt-1">
+          <p v-if="editValidationErrors.descricao" class="text-red-500 text-xs">
+            {{ editValidationErrors.descricao }}
+          </p>
+          <p class="text-gray-500 text-xs ml-auto">
+            {{ projetoLocal.descricao?.length || 0 }}/1000
+          </p>
+        </div>
+      </div>
 
       <!-- Datas -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -576,10 +766,22 @@ const calcularProgressoPercentual = () => {
           >
           <input
             v-model="projetoLocal.dataInicio"
+            @change="validarCampoEdicao('dataInicio', projetoLocal.dataInicio)"
             type="date"
-            class="w-full border border-amber-700 rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            class="w-full border rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            :class="
+              editValidationErrors.dataInicio
+                ? 'border-red-500'
+                : 'border-amber-700'
+            "
             required
           />
+          <p
+            v-if="editValidationErrors.dataInicio"
+            class="text-red-500 text-xs mt-1"
+          >
+            {{ editValidationErrors.dataInicio }}
+          </p>
         </div>
         <div>
           <label class="block text-sm font-medium text-primary mb-1"
@@ -587,10 +789,27 @@ const calcularProgressoPercentual = () => {
           >
           <input
             v-model="projetoLocal.dataFimPrevista"
+            @change="
+              validarCampoEdicao(
+                'dataFimPrevista',
+                projetoLocal.dataFimPrevista
+              )
+            "
             type="date"
-            class="w-full border border-amber-700 rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            class="w-full border rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+            :class="
+              editValidationErrors.dataFimPrevista
+                ? 'border-red-500'
+                : 'border-amber-700'
+            "
             required
           />
+          <p
+            v-if="editValidationErrors.dataFimPrevista"
+            class="text-red-500 text-xs mt-1"
+          >
+            {{ editValidationErrors.dataFimPrevista }}
+          </p>
         </div>
       </div>
 
@@ -612,7 +831,6 @@ const calcularProgressoPercentual = () => {
           :key="subprojeto.key"
           class="border border-amber-300 rounded p-3 mb-3 bg-amber-50"
         >
-
           <!-- Seleção do Subprojeto -->
           <div class="flex gap-2 items-start mb-2">
             <select
