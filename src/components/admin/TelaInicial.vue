@@ -1,108 +1,260 @@
 <script setup>
+import { ref, onMounted, computed } from "vue";
 import router from "@/router";
-import DescricaoTarefas from "../DescricaoTarefas.vue";
-import GoogleCalendar from "../GoogleCalendar.vue";
 import CardProjetos from "./CardProjetos.vue";
+import { API_URL } from "../../utils/apiUrl.js";
+
+const projetos = ref([]);
+const tarefasProjetos = ref([]);
 
 const STATUS = {
-  NAO_INICIADO: "NAO_INICIADO",
-  EM_ANDAMENTO: "EM_ANDAMENTO",
-  CONCLUIDO: "CONCLUIDO",
+  NAO_INICIADA: "NAO_INICIADA",
+  EM_ANDAMENTO: "EM_ANDAMENTO", 
+  CONCLUIDA: "CONCLUIDA"
 };
 
-const tarefas = [
-  {
-    nome: "Desenhar planta baixa",
-    projeto: "Casa de Praia",
-    status: STATUS.NAO_INICIADO,
-  },
-  {
-    nome: "Modelagem 3D da fachada",
-    projeto: "Edifício Comercial",
-    status: STATUS.EM_ANDAMENTO,
-  },
-  {
-    nome: "Criar maquete eletrônica",
-    projeto: "Residência Alto Padrão",
-    status: STATUS.NAO_INICIADO,
-  },
-  {
-    nome: "Revisar projeto estrutural",
-    projeto: "Reforma de Apartamento",
-    status: STATUS.CONCLUIDO,
-  },
-  {
-    nome: "Apresentação para cliente",
-    projeto: "Condomínio de Casas",
-    status: STATUS.EM_ANDAMENTO,
-  },
-];
+const carregarProjetos = async () => {
+  try {
+    const response = await fetch(`${API_URL}/projetos`);
+    if (!response.ok) throw new Error("Erro ao carregar projetos");
 
-const tarefasNaoIniciadas = tarefas.filter(
-  (tarefa) => tarefa.status === STATUS.NAO_INICIADO
+    const data = await response.json();
+    projetos.value = data;
+    
+    // Processar tarefas de todos os projetos
+    const todasTarefas = [];
+    data.forEach((projeto) => {
+      if (projeto.subprojetos && projeto.subprojetos.length > 0) {
+        projeto.subprojetos.forEach((subprojeto) => {
+          if (subprojeto.tarefas && subprojeto.tarefas.length > 0) {
+            subprojeto.tarefas.forEach((tarefa) => {
+              const nomeTarefa = tarefa.tarefaId?.nome || "Tarefa sem nome";
+              const statusTarefa = tarefa.status || "NAO_INICIADA";
+              
+              todasTarefas.push({
+                nome: nomeTarefa,
+                projeto: projeto.nome,
+                status: statusTarefa,
+              });
+            });
+          }
+        });
+      }
+    });
+    
+    tarefasProjetos.value = todasTarefas;
+  } catch (error) {
+    console.error("Erro ao carregar projetos:", error);
+  }
+};
+
+const tarefasNaoIniciadas = computed(() =>
+  tarefasProjetos.value.filter(tarefa => tarefa.status === STATUS.NAO_INICIADA)
 );
-const tarefasEmAndamento = tarefas.filter(
-  (tarefa) => tarefa.status === STATUS.EM_ANDAMENTO
+
+const tarefasEmAndamento = computed(() =>
+  tarefasProjetos.value.filter(tarefa => tarefa.status === STATUS.EM_ANDAMENTO)
 );
-const tarefasConcluidas = tarefas.filter(
-  (tarefa) => tarefa.status === STATUS.CONCLUIDO
+
+const tarefasConcluidas = computed(() =>
+  tarefasProjetos.value.filter(tarefa => tarefa.status === STATUS.CONCLUIDA)
 );
+
+const redirectToProjetos = () => {
+  router.push("/projetos");
+};
 
 const redirectToTarefas = () => {
   router.push("/tarefas");
-}
+};
+
+onMounted(() => {
+  carregarProjetos();
+});
 </script>
+
 <template>
-  <div class="grid grid-cols-[1fr_25%] gap-4">
-    <!-- Coluna da esquerda: Projetos -->
-    <main>
-      <h1 class="text-primary text-3xl mb-5 font-bold">
-        Olá, <span class="text-secondary">Anne Beatriz</span> ✌
-        <br />
-        <span class="font-normal text-lg">Seja bem-vindo(a) ao sistema.</span>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-primary text-4xl mb-2 font-bold">
+        Olá, <span class="text-secondary">Anne Beatriz</span> ✌️
       </h1>
+      <p class="text-gray-600 text-lg">Bem-vindo de volta! Aqui está um resumo do seu progresso.</p>
+    </div>
 
-      <div class="flex flex-col">
-        <h2 class="text-secondary text-2xl pb-4">Meus Projetos</h2>
-        <div class="flex flex-wrap gap-4">
-          <CardProjetos v-for="n in 8" :key="n" :index="n" />
-        </div>
-        <div class="flex justify-center mt-6">
-          <button
-            class="bg-secondary text-white font-semibold py-2.5 px-8 rounded-full shadow-md hover:shadow-lg hover:bg-secondary-dark transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 ease-in-out hover:text-secondary hover:bg-white hover:border-2 hover:border-secondary border-2"
-          >
-            Ver mais projetos
-          </button>
+    <!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total de Projetos -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Total de Projetos</p>
+            <p class="text-3xl font-bold text-gray-800">{{ projetos.length }}</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
         </div>
       </div>
-    </main>
 
-    <!-- Coluna da direita: Calendário e Tarefas -->
-    <aside class="w-full bg-white rounded-xl shadow-md p-4 h-">
-      <h2 class="text-secondary text-2xl pb-4 flex gap-2 font-semibold">
-        <img src="../icons/icone-calendário.svg" alt="Calendário" />Calendário
-      </h2>
-      <GoogleCalendar />
-      <div class="flex justify-around items-center my-4">
-        <h3 class="text-secondary font-bold">Tarefas</h3>
-        <button
-          @click="redirectToTarefas"
-          class="flex gap-1 text-tertiary border-2 border-tertiary rounded-3xl py-1 px-2 font-semibold transition-all transform duration-300 hover:scale-105"
-        >
-          <img src="../icons/add-icone-2.svg" alt="Ícone criar tarefa" />
-          Criar tarefa
-        </button>
+      <!-- Tarefas Pendentes -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Tarefas Pendentes</p>
+            <p class="text-3xl font-bold text-gray-800">{{ tarefasNaoIniciadas.length }}</p>
+          </div>
+          <div class="bg-yellow-100 p-3 rounded-full">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
       </div>
-      <div class="flex flex-col gap-4">
-        <DescricaoTarefas
-          :tarefas="tarefasNaoIniciadas"
-          status="NÃO INICIADO"
-        />
-        <DescricaoTarefas :tarefas="tarefasEmAndamento" status="EM ANDAMENTO" />
-        <DescricaoTarefas :tarefas="tarefasConcluidas" status="CONCLUÍDO" />
+
+      <!-- Tarefas em Andamento -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Em Andamento</p>
+            <p class="text-3xl font-bold text-gray-800">{{ tarefasEmAndamento.length }}</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-full">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+        </div>
       </div>
-    </aside>
+
+      <!-- Tarefas Concluídas -->
+      <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow duration-300">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">Concluídas</p>
+            <p class="text-3xl font-bold text-gray-800">{{ tarefasConcluidas.length }}</p>
+          </div>
+          <div class="bg-green-100 p-3 rounded-full">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seções Principais -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <!-- Projetos -->
+      <div class="xl:col-span-2">
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <span class="text-2xl">🏗️</span>
+              Meus Projetos
+            </h2>
+            <button
+              @click="redirectToProjetos"
+              class="bg-secondary text-white font-semibold py-2 px-4 rounded-lg hover:bg-secondary-dark transition-colors duration-300 flex items-center gap-2"
+            >
+              <span>Ver Todos</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div v-if="projetos.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardProjetos
+              v-for="projeto in projetos.slice(0, 6)"
+              :key="projeto._id"
+              :projeto="projeto"
+            />
+          </div>
+          
+          <div v-else class="text-center py-12">
+            <div class="text-gray-400 text-6xl mb-4">🏗️</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Nenhum projeto encontrado</h3>
+            <p class="text-gray-500 mb-4">Comece criando seu primeiro projeto</p>
+            <button
+              @click="redirectToProjetos"
+              class="bg-secondary text-white font-semibold py-2 px-6 rounded-lg hover:bg-secondary-dark transition-colors duration-300"
+            >
+              Criar Projeto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar com Tarefas Recentes -->
+      <div class="space-y-6">
+        <!-- Tarefas Recentes -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <span class="text-lg">📋</span>
+              Tarefas Recentes
+            </h3>
+            <button
+              @click="redirectToTarefas"
+              class="text-secondary hover:text-secondary-dark font-medium text-sm flex items-center gap-1"
+            >
+              <span>Ver todas</span>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Tarefas Não Iniciadas -->
+            <div v-for="(tarefa, index) in tarefasNaoIniciadas.slice(0, 3)" :key="`nao-${index}`">
+              <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200 hover:bg-yellow-100 transition-colors duration-200">
+                <div class="w-3 h-3 bg-yellow-400 rounded-full flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ tarefa.nome }}</p>
+                  <p class="text-xs text-gray-500 truncate">{{ tarefa.projeto }}</p>
+                </div>
+                <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full font-medium">Pendente</span>
+              </div>
+            </div>
+
+            <!-- Tarefas Em Andamento -->
+            <div v-for="(tarefa, index) in tarefasEmAndamento.slice(0, 2)" :key="`and-${index}`">
+              <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors duration-200">
+                <div class="w-3 h-3 bg-blue-400 rounded-full flex-shrink-0 animate-pulse"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ tarefa.nome }}</p>
+                  <p class="text-xs text-gray-500 truncate">{{ tarefa.projeto }}</p>
+                </div>
+                <span class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-medium">Em Curso</span>
+              </div>
+            </div>
+
+            <!-- Estado Vazio -->
+            <div v-if="tarefasProjetos.length === 0" class="text-center py-6">
+              <div class="text-gray-400 text-4xl mb-2">📋</div>
+              <p class="text-sm text-gray-500">Nenhuma tarefa encontrada</p>
+              <button
+                @click="redirectToTarefas"
+                class="mt-2 text-secondary hover:text-secondary-dark font-medium text-sm"
+              >
+                Criar primeira tarefa
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-<style></style>
+<style>
+/* Animação suave para cards */
+.group:hover {
+  transform: translateY(-1px);
+}
+</style>

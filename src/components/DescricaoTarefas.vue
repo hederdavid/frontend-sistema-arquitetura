@@ -7,7 +7,7 @@
   
       <div class="flex flex-col gap-4">
         <div
-          v-for="(tarefa, index) in tarefas"
+          v-for="(tarefa, index) in tarefasProcessadas"
           :key="index"
           class="flex items-center justify-between gap-2"
         >
@@ -57,7 +57,7 @@
   </template>
   
   <script setup>
-  import { reactive } from "vue";
+  import { computed } from "vue";
   
   const props = defineProps({
     status: {
@@ -70,10 +70,10 @@
     },
   });
   
-  const tarefas = reactive(
+  const tarefasProcessadas = computed(() => 
     props.tarefas.map(tarefa => ({
       ...tarefa,
-      concluida: tarefa.status === "CONCLUÍDO"
+      concluida: tarefa.status === "CONCLUIDA"
     }))
   );
   </script>
@@ -83,4 +83,3 @@
     outline: none;
   }
   </style>
-  

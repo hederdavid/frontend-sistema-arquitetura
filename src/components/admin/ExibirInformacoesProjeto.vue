@@ -613,7 +613,7 @@ const calcularProgressoPercentual = () => {
           class="border border-amber-300 rounded p-3 mb-3 bg-amber-50"
         >
 
-        <pre>{{ subprojetosSelecionados }}</pre>
+          <!-- Seleção do Subprojeto -->
           <div class="flex gap-2 items-start mb-2">
             <select
               v-model="subprojeto.subprojetoId"
