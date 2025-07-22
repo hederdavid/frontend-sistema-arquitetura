@@ -177,6 +177,8 @@ const salvarProjeto = async () => {
       body: JSON.stringify(p),
     });
 
+    console.log("Enviando projeto:", JSON.stringify(p));
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Erro ao salvar projeto");
@@ -271,13 +273,6 @@ onMounted(() => {
             class="w-full pl-10 pr-4 py-2 border border-primary-300 rounded-es-xl focus:outline-primary focus:ring-0 focus:ring-primary-500"
           />
         </div>
-      </div>
-      <div>
-        <ul class="flex justify-between mt-10 text-primary opacity-50">
-          <li class="basis-3/5">Nome</li>
-          <li class="basis-1/5">Status</li>
-          <li class="basis-2/5">Ações</li>
-        </ul>
       </div>
 
       <ExibirInformacoesProjeto

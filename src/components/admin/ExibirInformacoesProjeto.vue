@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import BaseModal from "@/components/BaseModal.vue";
 import { API_URL } from "../../utils/apiUrl.js";
 import { defineProps, defineEmits } from "vue";
@@ -13,6 +13,9 @@ import MensagemNotificacao from "@/components/MensagemNotificacao.vue";
 const showNotification = ref(false);
 const notificationType = ref("success");
 const notificationMessage = ref("");
+
+// Variável para garantir chaves únicas para o v-for
+let nextSubprojetoKey = 0;
 
 const showSuccess = () => {
   notificationType.value = "success";
@@ -34,12 +37,21 @@ const props = defineProps({
   },
 });
 
+// projetoLocal agora armazena IDs como strings para consistência
 const projetoLocal = ref({
   ...props.projeto,
+  clienteId: props.projeto.clienteId?._id || "",
+  dataInicio: props.projeto.dataInicio
+    ? props.projeto.dataInicio.split("T")[0]
+    : "",
+  dataFimPrevista: props.projeto.dataFimPrevista
+    ? props.projeto.dataFimPrevista.split("T")[0]
+    : "",
 });
 
 const clientes = ref([]);
 const subprojetosDisponiveis = ref([]);
+// subprojetosSelecionados agora armazena IDs como strings
 const subprojetosSelecionados = ref([]);
 
 watch(
@@ -47,6 +59,11 @@ watch(
   (novo) => {
     projetoLocal.value = {
       ...novo,
+      clienteId: novo.clienteId?._id || "",
+      dataInicio: novo.dataInicio ? novo.dataInicio.split("T")[0] : "",
+      dataFimPrevista: novo.dataFimPrevista
+        ? novo.dataFimPrevista.split("T")[0]
+        : "",
     };
   },
   { deep: true }
@@ -78,6 +95,7 @@ const carregarSubprojetos = async () => {
   }
 };
 
+// CORRIGIDO: Garante que a estrutura da tarefa seja consistente ao carregar.
 const carregarTarefasDoSubprojeto = async (subprojetoId, subprojetoIndex) => {
   if (!subprojetoId) {
     subprojetosSelecionados.value[subprojetoIndex].tarefas = [];
@@ -89,47 +107,51 @@ const carregarTarefasDoSubprojeto = async (subprojetoId, subprojetoIndex) => {
     if (!response.ok) throw new Error("Erro ao carregar tarefas do subprojeto");
 
     const subprojeto = await response.json();
+    console.log("Subprojeto carregado:", subprojeto);
 
-    subprojetosSelecionados.value[subprojetoIndex].tarefas =
-      subprojeto.tarefas.map((tarefa) => ({
-        tarefaId: typeof tarefa === "object" ? tarefa._id : tarefa,
-        tarefaNome: typeof tarefa === "object" ? tarefa.nome : "",
-        dataInicio: "",
-        dataFimPrevista: "",
-        dataFimReal: "",
-        status: "NAO_INICIADA",
-        observacoes: "",
-      }));
-
-    if (
-      subprojeto.tarefas.length > 0 &&
-      typeof subprojeto.tarefas[0] === "string"
-    ) {
-      for (
-        let i = 0;
-        i < subprojetosSelecionados.value[subprojetoIndex].tarefas.length;
-        i++
-      ) {
-        const tarefaId = subprojeto.tarefas[i];
-        const tarefaResponse = await fetch(`${API_URL}/tarefas/${tarefaId}`);
-        if (tarefaResponse.ok) {
-          const tarefaDetalhes = await tarefaResponse.json();
-          subprojetosSelecionados.value[subprojetoIndex].tarefas[i].tarefaNome =
-            tarefaDetalhes.nome;
+    // As tarefas vêm como array de IDs, precisamos buscar os dados completos
+    if (subprojeto.tarefas && subprojeto.tarefas.length > 0) {
+      const tarefasCompletas = [];
+      
+      for (const tarefaId of subprojeto.tarefas) {
+        try {
+          // Buscar dados completos de cada tarefa
+          const tarefaResponse = await fetch(`${API_URL}/tarefas/${tarefaId}`);
+          if (tarefaResponse.ok) {
+            const tarefaCompleta = await tarefaResponse.json();
+            tarefasCompletas.push({
+              tarefaId: tarefaCompleta._id,
+              tarefaNome: tarefaCompleta.nome || 'Tarefa sem nome',
+              dataInicio: "",
+              dataFimPrevista: "",
+              dataFimReal: "",
+              status: "NAO_INICIADA",
+              observacoes: "",
+            });
+          } else {
+            console.warn(`Erro ao carregar tarefa ${tarefaId}`);
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar tarefa ${tarefaId}:`, error);
         }
       }
+      
+      subprojetosSelecionados.value[subprojetoIndex].tarefas = tarefasCompletas;
+    } else {
+      subprojetosSelecionados.value[subprojetoIndex].tarefas = [];
     }
+
+    console.log("Tarefas após processamento:", subprojetosSelecionados.value[subprojetoIndex].tarefas);
   } catch (error) {
     console.error("Erro ao carregar tarefas do subprojeto:", error);
-    mostrarAlertaErro(
-      "Erro",
-      "Não foi possível carregar as tarefas do subprojeto."
-    );
+    mostrarAlertaErro("Erro", "Não foi possível carregar as tarefas do subprojeto.");
+    subprojetosSelecionados.value[subprojetoIndex].tarefas = [];
   }
 };
 
 const adicionarSubprojeto = () => {
   subprojetosSelecionados.value.push({
+    key: nextSubprojetoKey++,
     subprojetoId: "",
     tarefas: [],
   });
@@ -141,16 +163,58 @@ const removerSubprojeto = (index) => {
 
 const openEditarModal = async () => {
   isModalOpen.value = true;
+  
   projetoLocal.value = {
     ...props.projeto,
+    clienteId: props.projeto.clienteId?._id,
+    dataInicio: props.projeto.dataInicio
+      ? props.projeto.dataInicio.split("T")[0]
+      : "",
+    dataFimPrevista: props.projeto.dataFimPrevista
+      ? props.projeto.dataFimPrevista.split("T")[0]
+      : "",
   };
-
-  subprojetosSelecionados.value = props.projeto.subprojetos
-    ? [...props.projeto.subprojetos]
-    : [];
 
   await carregarClientes();
   await carregarSubprojetos();
+
+  const taskNameMap = new Map();
+  if (subprojetosDisponiveis.value) {
+      subprojetosDisponiveis.value.forEach(sub => {
+          if (sub.tarefas) {
+              sub.tarefas.forEach(task => {
+                  taskNameMap.set(task._id, task.nome);
+              });
+          }
+      });
+  }
+
+  subprojetosSelecionados.value = props.projeto.subprojetos
+    ? props.projeto.subprojetos
+      .filter(sub => sub && sub.subprojetoId) 
+      .map((sub) => ({
+        key: nextSubprojetoKey++,
+        subprojetoId: sub.subprojetoId._id, 
+        tarefas: (sub.tarefas || [])
+          .filter(tarefa => tarefa && tarefa.tarefaId) 
+          .map((tarefa) => {
+            const tarefaId = tarefa.tarefaId._id;
+            return {
+              tarefaId: tarefaId,
+              tarefaNome: taskNameMap.get(tarefaId) || "Tarefa não encontrada",
+              status: tarefa.status,
+              observacoes: tarefa.observacoes || "",
+              dataInicio: tarefa.dataInicio ? tarefa.dataInicio.split("T")[0] : "",
+              dataFimPrevista: tarefa.dataFimPrevista
+                ? tarefa.dataFimPrevista.split("T")[0]
+                : "",
+              dataFimReal: tarefa.dataFimReal
+                ? tarefa.dataFimReal.split("T")[0]
+                : "",
+            }
+          }),
+      }))
+    : [];
 };
 
 const openDescricaoModal = () => {
@@ -178,6 +242,8 @@ const atualizarProjeto = async () => {
       })),
   };
 
+  console.log("Projeto a ser atualizado:", p);
+
   if (
     !p.nome ||
     !p.descricao ||
@@ -191,7 +257,7 @@ const atualizarProjeto = async () => {
 
   try {
     const response = await fetch(`${API_URL}/projetos/${p._id}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -201,7 +267,7 @@ const atualizarProjeto = async () => {
     if (!response.ok) throw new Error("Erro ao atualizar projeto");
 
     const data = await response.json();
-    emit("projetoAtualizado", p);
+    emit("projetoAtualizado", data);
     console.log("Projeto atualizado:", data);
 
     isModalOpen.value = false;
@@ -251,10 +317,14 @@ const excluirProjeto = async (id) => {
   }
 };
 
+onMounted(() => {
+  console.log("Props do projeto inicial:", props.projeto);
+});
+
 // Funções auxiliares para o novo layout
 const formatarData = (data) => {
   if (!data) return "Não definida";
-  return new Date(data).toLocaleDateString("pt-BR");
+  return new Date(data + 'T00:00:00').toLocaleDateString("pt-BR");
 };
 
 const calcularDuracao = (dataInicio, dataFim) => {
@@ -263,13 +333,13 @@ const calcularDuracao = (dataInicio, dataFim) => {
   const fim = new Date(dataFim);
   const diffTime = Math.abs(fim - inicio);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return `${diffDays} dias`;
+  return `${diffDays + 1} dias`;
 };
 
 const contarTotalTarefas = () => {
   let total = 0;
   if (props.projeto.subprojetos) {
-    props.projeto.subprojetos.forEach(sub => {
+    props.projeto.subprojetos.forEach((sub) => {
       total += sub.tarefas?.length || 0;
     });
   }
@@ -279,9 +349,9 @@ const contarTotalTarefas = () => {
 const contarTarefasConcluidas = () => {
   let concluidas = 0;
   if (props.projeto.subprojetos) {
-    props.projeto.subprojetos.forEach(sub => {
+    props.projeto.subprojetos.forEach((sub) => {
       if (sub.tarefas) {
-        sub.tarefas.forEach(tarefa => {
+        sub.tarefas.forEach((tarefa) => {
           if (tarefa.status === "CONCLUIDA") {
             concluidas++;
           }
@@ -297,20 +367,12 @@ const calcularProgressoPercentual = () => {
   const concluidas = contarTarefasConcluidas();
   return total > 0 ? (concluidas / total) * 100 : 0;
 };
-
-const obterNomeCliente = (clienteId) => {
-  const cliente = clientes.value.find(c => c._id === clienteId);
-  return cliente?.nome_completo || "Cliente não encontrado";
-};
-
-const obterNomeSubprojeto = (subprojetoId) => {
-  const subprojeto = subprojetosDisponiveis.value.find(s => s._id === subprojetoId);
-  return subprojeto?.nome || "Subprojeto não encontrado";
-};
 </script>
 
 <template>
-  <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-4 p-6 transition-all duration-300 hover:shadow-lg">
+  <div
+    class="bg-white rounded-lg shadow-md border border-gray-200 mb-4 p-6 transition-all duration-300 hover:shadow-lg"
+  >
     <!-- Header do Projeto -->
     <div class="flex justify-between items-start mb-4">
       <div class="flex-1">
@@ -320,19 +382,23 @@ const obterNomeSubprojeto = (subprojetoId) => {
         <div class="flex items-center gap-4 text-sm text-gray-600">
           <div class="flex items-center gap-1">
             <span class="font-medium">Cliente:</span>
-            <span>{{ obterNomeCliente(props.projeto.clienteId) }}</span>
+            <span>{{ props.projeto.clienteId?.nome_completo || 'N/A' }}</span>
           </div>
           <div class="flex items-center gap-1">
             <span class="font-medium">Subprojetos:</span>
-            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+            <span
+              class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs"
+            >
               {{ props.projeto.subprojetos?.length || 0 }}
             </span>
           </div>
         </div>
       </div>
-      
+
       <div class="flex flex-col items-end gap-2">
-        <span class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+        <span
+          class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+        >
           PROJETO
         </span>
         <div class="text-xs text-gray-500">
@@ -349,15 +415,24 @@ const obterNomeSubprojeto = (subprojetoId) => {
         <div class="space-y-1 text-xs">
           <div class="flex justify-between">
             <span class="text-gray-600">Início:</span>
-            <span class="font-medium">{{ formatarData(props.projeto.dataInicio) }}</span>
+            <span class="font-medium">{{
+              formatarData(props.projeto.dataInicio)
+            }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Fim Previsto:</span>
-            <span class="font-medium">{{ formatarData(props.projeto.dataFimPrevista) }}</span>
+            <span class="font-medium">{{
+              formatarData(props.projeto.dataFimPrevista)
+            }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Duração:</span>
-            <span class="font-medium">{{ calcularDuracao(props.projeto.dataInicio, props.projeto.dataFimPrevista) }}</span>
+            <span class="font-medium">{{
+              calcularDuracao(
+                props.projeto.dataInicio,
+                props.projeto.dataFimPrevista
+              )
+            }}</span>
           </div>
         </div>
       </div>
@@ -372,11 +447,13 @@ const obterNomeSubprojeto = (subprojetoId) => {
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">Concluídas:</span>
-            <span class="font-medium text-green-600">{{ contarTarefasConcluidas() }}</span>
+            <span class="font-medium text-green-600">{{
+              contarTarefasConcluidas()
+            }}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div 
-              class="bg-green-500 h-2 rounded-full transition-all duration-300" 
+            <div
+              class="bg-green-500 h-2 rounded-full transition-all duration-300"
               :style="{ width: calcularProgressoPercentual() + '%' }"
             ></div>
           </div>
@@ -390,7 +467,7 @@ const obterNomeSubprojeto = (subprojetoId) => {
       <div class="bg-gray-50 rounded-lg p-3">
         <h4 class="font-semibold text-primary text-sm mb-2">📝 Descrição</h4>
         <p class="text-xs text-gray-600 line-clamp-3">
-          {{ props.projeto.descricao || 'Nenhuma descrição fornecida.' }}
+          {{ props.projeto.descricao || "Nenhuma descrição fornecida." }}
         </p>
         <button
           @click="openDescricaoModal"
@@ -402,20 +479,23 @@ const obterNomeSubprojeto = (subprojetoId) => {
     </div>
 
     <!-- Subprojetos Preview -->
-    <div v-if="props.projeto.subprojetos && props.projeto.subprojetos.length > 0" class="mb-4">
+    <div
+      v-if="props.projeto.subprojetos && props.projeto.subprojetos.length > 0"
+      class="mb-4"
+    >
       <h4 class="font-semibold text-primary text-sm mb-2">🎯 Subprojetos</h4>
       <div class="flex flex-wrap gap-2">
-        <div 
+        <div
           v-for="(subprojeto, index) in props.projeto.subprojetos.slice(0, 3)"
           :key="index"
           class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs"
         >
-          {{ obterNomeSubprojeto(subprojeto.subprojetoId) }}
+          {{ subprojeto.subprojetoId.nome }}
           <span class="ml-1 bg-amber-200 px-1 rounded">
             {{ subprojeto.tarefas?.length || 0 }}
           </span>
         </div>
-        <div 
+        <div
           v-if="props.projeto.subprojetos.length > 3"
           class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
         >
@@ -454,19 +534,19 @@ const obterNomeSubprojeto = (subprojetoId) => {
     @close="isModalOpen = false"
     @confirm="atualizarProjeto"
   >
-    <form class="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+    <form class="space-y-4 max-h-[70vh] overflow-y-auto p-1">
       <!-- Nome e Cliente -->
-      <div class="col-span-2 flex w-full gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <input
           v-model="projetoLocal.nome"
           type="text"
-          class="flex-[1.5] min-w-0 border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+          class="w-full border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
           placeholder="Nome do projeto *"
           required
         />
         <select
           v-model="projetoLocal.clienteId"
-          class="flex-[1] min-w-0 border border-amber-700 rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+          class="w-full border border-amber-700 rounded px-4 py-2 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
           required
         >
           <option value="">Selecione o cliente *</option>
@@ -481,18 +561,16 @@ const obterNomeSubprojeto = (subprojetoId) => {
       </div>
 
       <!-- Descrição -->
-      <div class="col-span-2 flex w-full gap-4">
-        <textarea
-          v-model="projetoLocal.descricao"
-          class="flex-[2] min-w-0 border border-amber-700 rounded px-4 py-2 w-full placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
-          placeholder="Descrição *"
-          rows="3"
-        ></textarea>
-      </div>
+      <textarea
+        v-model="projetoLocal.descricao"
+        class="w-full border border-amber-700 rounded px-4 py-2 placeholder:text-amber-700 placeholder:opacity-70 text-sm bg-primary bg-opacity-5 focus:outline-amber-800 focus:ring-0"
+        placeholder="Descrição *"
+        rows="3"
+      ></textarea>
 
       <!-- Datas -->
-      <div class="col-span-2 flex w-full gap-4">
-        <div class="flex-1">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
           <label class="block text-sm font-medium text-primary mb-1"
             >Data de Início *</label
           >
@@ -503,7 +581,7 @@ const obterNomeSubprojeto = (subprojetoId) => {
             required
           />
         </div>
-        <div class="flex-1">
+        <div>
           <label class="block text-sm font-medium text-primary mb-1"
             >Data Fim Prevista *</label
           >
@@ -531,9 +609,11 @@ const obterNomeSubprojeto = (subprojetoId) => {
 
         <div
           v-for="(subprojeto, subIndex) in subprojetosSelecionados"
-          :key="subIndex"
+          :key="subprojeto.key"
           class="border border-amber-300 rounded p-3 mb-3 bg-amber-50"
         >
+
+        <pre>{{ subprojetosSelecionados }}</pre>
           <div class="flex gap-2 items-start mb-2">
             <select
               v-model="subprojeto.subprojetoId"
@@ -563,9 +643,9 @@ const obterNomeSubprojeto = (subprojetoId) => {
           <!-- Tarefas do Subprojeto -->
           <div
             v-if="subprojeto.tarefas && subprojeto.tarefas.length > 0"
-            class="ml-4"
+            class="ml-4 space-y-3"
           >
-            <div class="mb-2">
+            <div class="mb-2 border-b border-amber-200 pb-1">
               <span class="text-xs font-medium text-primary"
                 >Tarefas Vinculadas</span
               >
@@ -574,7 +654,7 @@ const obterNomeSubprojeto = (subprojetoId) => {
             <div
               v-for="(tarefa, tarefaIndex) in subprojeto.tarefas"
               :key="tarefaIndex"
-              class="border border-blue-200 rounded p-2 mb-2 bg-blue-50"
+              class="border border-blue-200 rounded p-2 bg-blue-50"
             >
               <div class="mb-2">
                 <label class="block text-xs font-medium text-primary"
@@ -583,7 +663,7 @@ const obterNomeSubprojeto = (subprojetoId) => {
                 <input
                   :value="tarefa.tarefaNome"
                   type="text"
-                  class="w-full border border-blue-300 rounded px-2 py-1 text-xs bg-gray-100"
+                  class="w-full border border-blue-300 rounded px-2 py-1 text-xs bg-gray-100 cursor-not-allowed"
                   readonly
                 />
               </div>
@@ -637,7 +717,9 @@ const obterNomeSubprojeto = (subprojetoId) => {
 
               <!-- Observações -->
               <div>
-                <label class="block text-xs text-primary mb-1">Observações</label>
+                <label class="block text-xs text-primary mb-1"
+                  >Observações</label
+                >
                 <textarea
                   v-model="tarefa.observacoes"
                   class="w-full border border-blue-300 rounded px-2 py-1 text-xs"
@@ -663,6 +745,6 @@ const obterNomeSubprojeto = (subprojetoId) => {
     :visible="showNotification"
     :type="notificationType"
     :message="notificationMessage"
-    @close="showNotification.value = false"
+    @close="showNotification = false"
   />
 </template>
