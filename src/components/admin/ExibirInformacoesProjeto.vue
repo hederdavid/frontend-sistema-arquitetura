@@ -477,6 +477,9 @@ const formatarData = (data) => {
     const dataFormatada = new Date(data);
     if (isNaN(dataFormatada)) throw new Error("Data inválida");
 
+    // Ajustar para UTC-3 (horário do Brasil)
+    dataFormatada.setHours(dataFormatada.getHours() + 3);
+
     return dataFormatada.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
