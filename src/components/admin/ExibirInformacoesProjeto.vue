@@ -472,7 +472,20 @@ onMounted(() => {
 // Funções auxiliares para o novo layout
 const formatarData = (data) => {
   if (!data) return "Não definida";
-  return new Date(data + "T00:00:00").toLocaleDateString("pt-BR");
+
+  try {
+    const dataFormatada = new Date(data);
+    if (isNaN(dataFormatada)) throw new Error("Data inválida");
+
+    return dataFormatada.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch (error) {
+    console.error("Erro ao formatar data:", error);
+    return "Data inválida";
+  }
 };
 
 const calcularDuracao = (dataInicio, dataFim) => {
