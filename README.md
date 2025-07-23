@@ -21,7 +21,7 @@ Na **primeira sprint**, o foco será o desenvolvimento do **módulo de cadastro 
 Este projeto está sendo desenvolvido por:
 
 - **Heder David**
-- **João Vittor Lemos**
+- **João Vitor Lemos**
 - **Júlia Carvalho**
 - **Rebeca Freitas**
 
